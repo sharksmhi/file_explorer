@@ -183,9 +183,6 @@ class InstrumentFile(ABC):
         with open(target_path, 'w') as fid:
             fid.write('\n'.join(self.lines))
 
-    def in_bbox(self, **kwargs):
-        return utils.in_bbox(self, **kwargs)
-
     def is_matching(self, **kwargs):
         return utils.is_matching(self, **kwargs)
 

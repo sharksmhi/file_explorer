@@ -106,7 +106,7 @@ class PackageCollection:
                 if 'station' in kwargs:
                     col_name = str(pack('datetime'))
                 else:
-                    col_name = f"{pack('station')} - {pack('datetime')}"
+                    col_name = f"{pack('datetime')} - {pack('station')}"
                 df[col_name] = data[par]
 
                 df.set_index(zpar, inplace=True)
@@ -117,7 +117,7 @@ class PackageCollection:
             else:
                 all_data.append(data)
 
-        return all_data or tot_df
+        return all_data or tot_df.sort_index()
 
     def plot_data(self, zpar=None, par=None, **kwargs):
         import matplotlib.pyplot as plt
