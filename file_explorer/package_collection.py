@@ -80,7 +80,7 @@ class PackageCollection:
 
     def get_data(self, zpar=None, par=None, in_zpar=None, in_par=None, **kwargs):
         import pandas as pd
-        all_data = []
+        all_data = {}
         tot_df = None
         for pack in self.packages:
             if not pack.is_matching(**kwargs):
@@ -115,7 +115,7 @@ class PackageCollection:
                 else:
                     tot_df = tot_df.join(df, on=zpar)
             else:
-                all_data.append(data)
+                all_data[f"{pack('datetime')} - {pack('station')}"] = data
 
         return all_data or tot_df.sort_index()
 
@@ -133,6 +133,23 @@ class PackageCollection:
             plt.ylabel(zpar, fontsize=12)
             plt.show()
 
+    def write_data_to_directory(self, directory, **kwargs):
+        import pathlib
+        data = self.get_data(**kwargs)
+
+        string_list = [self._name]
+        for key, value in kwargs.items():
+            string_list.append(f'{key}={value}')
+        string = '_'.join(string_list)
+
+        if isinstance(data, dict):
+            for key, value in data.items():
+                path = pathlib.Path(directory, string, f"{key.replace(':', '').replace('/', ' ')}.txt")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                value.to_csv(path, sep='\t', index=False)
+        else:
+            path = pathlib.Path(directory, f"{string}.txt")
+            data.to_csv(path, sep='\t')
 
     def get_latest_serno(self, **kwargs):
         """
