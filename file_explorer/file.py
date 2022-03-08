@@ -14,6 +14,7 @@ class InstrumentFile(ABC):
     _path_info = {}
     _attributes = {}
     _lines = None
+    data = None
 
     def __init__(self, path, ignore_pattern=False):
         self.path = Path(path)
@@ -61,8 +62,8 @@ class InstrumentFile(ABC):
             return
         else:
             if len(keys) == 1:
-                return self.attributes.get(keys[0])
-            return tuple([self.attributes.get(key.lower()) for key in keys])
+                return self.attributes.get(keys[0], False)
+            return tuple([self.attributes.get(key.lower(), False) for key in keys])
 
     def __getattr__(self, item):
         return self(item)

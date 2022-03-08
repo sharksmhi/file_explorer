@@ -72,8 +72,8 @@ class Package(Operations):
             return
         else:
             if len(keys) == 1:
-                return self.attributes.get(keys[0])
-            return tuple([self.attributes.get(key.lower()) for key in keys])
+                return self.attributes.get(keys[0], False)
+            return tuple([self.attributes.get(key.lower(), False) for key in keys])
 
     def __getitem__(self, item):
         return self.path(item)
@@ -111,10 +111,9 @@ class Package(Operations):
 
     def get_data(self, **kwargs):
         for file_obj in self._files:
-            for k, v in kwargs.items():
-                if file_obj.attributes.get(k) != v:
-                    break
-            else:
+            if not file_obj.is_matching(**kwargs):
+                continue
+            elif file_obj.data is not None:
                 return file_obj.data
 
     @property
@@ -131,24 +130,6 @@ class Package(Operations):
                     continue
                 attributes[key] = value
         return attributes
-
-    def _get_attributes_from_files(self, *keys, **kwargs):
-        """
-        Returns the attribute "key"
-        :param key:
-        :param kwargs:
-        :return:
-        """
-        for file_obj in self._files:
-            for k, v in kwargs.items():
-                if file_obj.attributes.get(k) != v:
-                    break
-            else:
-                values = [file_obj(key) for key in keys]
-                if len(values) == 1:
-                    return values[0]
-                else:
-                    return tuple(values)
 
     @property
     def key(self):

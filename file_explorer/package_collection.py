@@ -10,7 +10,7 @@ class PackageCollection:
         if packages:
             self.add_packages(packages)
 
-    def __call__(self, *args, missing=True, **kwargs):
+    def __call__(self, *args, **kwargs):
         if kwargs:
             packages = self.get_packages_matching(**kwargs)
         else:
@@ -22,8 +22,6 @@ class PackageCollection:
                 values.append(pack(key))
             if len(values) == 1:
                 values = values[0]
-                if not values and not missing:
-                    continue
             else:
                 values = tuple(values)
             attr_list.append(values)
@@ -79,6 +77,56 @@ class PackageCollection:
         if as_collection:
             return PackageCollection(f'subselection_{self.name}', matching_packages)
         return matching_packages
+
+    def get_data(self, zpar=None, par=None, in_par=None, **kwargs):
+        import pandas as pd
+        all_data = []
+        tot_df = None
+        for pack in self.packages:
+            if not pack.is_matching(**kwargs):
+                continue
+            data = pack.get_data(**kwargs)
+            if data is None:
+                continue
+            if zpar and (par or in_par):
+                if in_par:
+                    for col in data.columns:
+                        if in_par in col:
+                            par = col
+                            break
+                if zpar not in data.columns or par not in data.columns:
+                    continue
+                df = pd.DataFrame()
+                df[zpar] = data[zpar]
+                if 'station' in kwargs:
+                    col_name = str(pack('datetime'))
+                else:
+                    col_name = f"{pack('station')} - {pack('datetime')}"
+                df[col_name] = data[par]
+                df.set_index(zpar, inplace=True)
+                if tot_df is None:
+                    tot_df = df.copy(deep=True)
+                else:
+                    tot_df = tot_df.join(df, on=zpar)
+            else:
+                all_data.append(data)
+
+        return all_data or tot_df
+
+    def plot_data(self, zpar=None, par=None, **kwargs):
+        import matplotlib.pyplot as plt
+
+        df = self.get_data(zpar, par, **kwargs)
+        with plt.style.context('ggplot'):
+            for col in df.columns:
+                plt.plot(df[col], -df.index, label=col)
+            plt.legend(loc=3)
+            if 'station' in kwargs:
+                plt.title(kwargs.get('station'))
+            plt.xlabel(par, fontsize=12)
+            plt.ylabel(zpar, fontsize=12)
+            plt.show()
+
 
     def get_latest_serno(self, **kwargs):
         """

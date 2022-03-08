@@ -34,7 +34,7 @@ def is_matching(obj, **kwargs):
                 value = value.lower()
             item = item.lower()
         if in_:
-            if value and value not in item:
+            if isinstance(value, str) and isinstance(item, str) and value not in item:
                 return False
         elif item != value:
             return False
