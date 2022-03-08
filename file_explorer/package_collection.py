@@ -91,7 +91,7 @@ class PackageCollection:
             if zpar and (par or in_par):
                 if in_par:
                     for col in data.columns:
-                        if in_par in col:
+                        if in_par.lower() in col.lower():
                             par = col
                             break
                 if zpar not in data.columns or par not in data.columns:
