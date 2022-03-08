@@ -78,7 +78,7 @@ class PackageCollection:
             return PackageCollection(f'subselection_{self.name}', matching_packages)
         return matching_packages
 
-    def get_data(self, zpar=None, par=None, in_par=None, **kwargs):
+    def get_data(self, zpar=None, par=None, in_zpar=None, in_par=None, **kwargs):
         import pandas as pd
         all_data = []
         tot_df = None
@@ -88,7 +88,12 @@ class PackageCollection:
             data = pack.get_data(**kwargs)
             if data is None:
                 continue
-            if zpar and (par or in_par):
+            if (zpar or in_zpar) and (par or in_par):
+                if in_zpar:
+                    for col in data.columns:
+                        if in_zpar.lower() in col.lower():
+                            zpar = col
+                            break
                 if in_par:
                     for col in data.columns:
                         if in_par.lower() in col.lower():
@@ -103,6 +108,7 @@ class PackageCollection:
                 else:
                     col_name = f"{pack('station')} - {pack('datetime')}"
                 df[col_name] = data[par]
+
                 df.set_index(zpar, inplace=True)
                 if tot_df is None:
                     tot_df = df.copy(deep=True)
