@@ -82,9 +82,7 @@ class PackageCollection:
         import pandas as pd
         all_data = {}
         tot_df = None
-        for pack in self.packages:
-            if not pack.is_matching(**kwargs):
-                continue
+        for pack in self.get_packages_matching(**kwargs):
             data = pack.get_data(**kwargs)
             if data is None:
                 continue
