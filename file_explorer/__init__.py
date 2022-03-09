@@ -21,6 +21,8 @@ from file_explorer.package import Package
 from file_explorer.package import MvpPackage
 from file_explorer.package_collection import PackageCollection
 
+from file_explorer import utils
+
 FILES = {
     'sbe': {
         TxtFile.suffix: TxtFile,
@@ -79,7 +81,7 @@ def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
         return
     try:
         obj = file_cls(path)
-        if not obj.is_matching(**kwargs):
+        if not utils.is_matching(obj, **kwargs):
             return None
         return obj
     except UnrecognizedFile:
@@ -90,7 +92,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     packages = {}
     for path in file_list:
         file = get_file_object_for_path(path, instrument_type=instrument_type)
-        if not file or not file.is_matching(**kwargs):
+        if not file or not utils.is_matching(file, **kwargs):
             continue
         PACK = PACKAGES.get(instrument_type)
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes))

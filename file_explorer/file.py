@@ -58,7 +58,7 @@ class InstrumentFile(ABC):
         return self.__str__()
 
     def __call__(self, *keys, **kwargs):
-        if not self.is_matching(**kwargs):
+        if not utils.is_matching(self, **kwargs):
             return
         else:
             if len(keys) == 1:
@@ -182,9 +182,6 @@ class InstrumentFile(ABC):
             raise FileExistsError(target_path)
         with open(target_path, 'w') as fid:
             fid.write('\n'.join(self.lines))
-
-    def is_matching(self, **kwargs):
-        return utils.is_matching(self, **kwargs)
 
 
 class UnrecognizedFile(Exception):

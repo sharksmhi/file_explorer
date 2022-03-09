@@ -1,5 +1,5 @@
 from file_explorer.package import Package
-
+from file_explorer import utils
 
 class PackageCollection:
 
@@ -72,7 +72,7 @@ class PackageCollection:
     def get_packages_matching(self, as_collection=False, **kwargs):
         matching_packages = []
         for pack in self.packages:
-            if pack.is_matching(**kwargs):
+            if utils.is_matching(pack, **kwargs):
                 matching_packages.append(pack)
         if as_collection:
             return PackageCollection(f'subselection_{self.name}', matching_packages)
