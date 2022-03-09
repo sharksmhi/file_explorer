@@ -17,8 +17,12 @@ from file_explorer.seabird import JpgFile
 
 from file_explorer.seabird import mvp_files
 
+from file_explorer.odv import odv_file
+
 from file_explorer.package import Package
 from file_explorer.package import MvpPackage
+from file_explorer.package import OdvPackage
+
 from file_explorer.package_collection import PackageCollection
 
 from file_explorer import utils
@@ -50,11 +54,17 @@ FILES = {
         mvp_files.S52File.suffix: mvp_files.S52File,
         # mvp_files.CnvFile.suffix: mvp_files.CnvFile,
         CnvFile.suffix: CnvFile,
+    },
+    'odv': {
+        odv_file.OdvFile.suffix: odv_file.OdvFile
     }
 }
 
-PACKAGES = {Package.INSTRUMENT_TYPE: Package,
-            MvpPackage.INSTRUMENT_TYPE: MvpPackage}
+PACKAGES = {
+    Package.INSTRUMENT_TYPE: Package,
+    MvpPackage.INSTRUMENT_TYPE: MvpPackage,
+    OdvPackage.INSTRUMENT_TYPE: OdvPackage
+}
 
 
 def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suffix=''):
@@ -96,6 +106,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
             continue
         PACK = PACKAGES.get(instrument_type)
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes))
+        file.package_instrument_type = PACK.INSTRUMENT_TYPE
         pack.add_file(file)
     for pack in packages.values():
         pack.set_key()
@@ -141,10 +152,11 @@ def update_package_with_files_in_directory(package, directory, exclude_directory
     # all_files = Path(directory).glob('**/*')
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
     for path in all_files:
-        obj = get_file_object_for_path(path)
-        if not obj:
+        file = get_file_object_for_path(path)
+        if not file:
             continue
-        package.add_file(obj, replace=replace)
+        file.package_instrument_type = package.INSTRUMENT_TYPE
+        package.add_file(file, replace=replace)
 
 
 def rename_file_object(file_object, overwrite=False):

@@ -15,6 +15,7 @@ class InstrumentFile(ABC):
     _attributes = {}
     _lines = None
     data = None
+    package_instrument_type = None
 
     def __init__(self, path, ignore_pattern=False):
         self.path = Path(path)

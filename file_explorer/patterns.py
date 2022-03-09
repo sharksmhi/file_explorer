@@ -74,6 +74,17 @@ FILE_NAME_PATTERNS = [
                                                     '(?P<suffix>\w*)?'
                                                     )
                    ),
+        # ODV '\d*_ODV_\w{4}\d{4}_\d*_\w{3}_\w{2}.\w*'
+        re.compile('^{}_{}_{}{}_{}_{}_{}.{}$'.format('(?P<originator>\d*)',
+                                                    '(?P<format>odv)',
+                                                    '(?P<ship>\d{2}\w{2})',
+                                                    '(?P<year>\d{4})',
+                                                    '(?P<number>\d*)',
+                                                    '(?P<dtype>\w{3})',
+                                                    '(?P<version>\w{2})',
+                                                    '(?P<suffix>\w*)?'
+                                                    )
+                   ),
 
     ]
 

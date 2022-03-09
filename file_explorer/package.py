@@ -246,4 +246,22 @@ class MvpPackage(Package):
                     transect=self('transect'))
 
 
+class OdvPackage(Package):
+    INSTRUMENT_TYPE = 'odv'
+    RAW_FILES_EXTENSIONS = []
+
+    def _set_config_suffix(self, file):
+        pass
+
+    @property
+    def key(self):
+        if not all(list(self.key_info.values())):
+            return None
+        return self('stem').upper()
+
+    @property
+    def key_info(self):
+        return None
+
+
 
