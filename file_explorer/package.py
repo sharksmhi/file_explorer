@@ -72,7 +72,7 @@ class Package(Operations):
             return
         else:
             if len(keys) == 1:
-                return self.attributes.get(keys[0], False)
+                return self.attributes.get(keys[0].lower(), False)
             return tuple([self.attributes.get(key.lower(), False) for key in keys])
 
     def __getitem__(self, item):
