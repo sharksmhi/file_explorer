@@ -78,7 +78,7 @@ class PackageCollection:
             return PackageCollection(f'subselection_{self.name}', matching_packages)
         return matching_packages
 
-    def get_data(self, zpar=None, par=None, in_zpar=None, in_par=None, **kwargs):
+    def get_data(self, zpar=None, par=None, IN_zpar=None, IN_par=None, **kwargs):
         import pandas as pd
         all_data = {}
         tot_df = None
@@ -88,15 +88,15 @@ class PackageCollection:
             data = pack.get_data(**kwargs)
             if data is None:
                 continue
-            if (zpar or in_zpar) and (par or in_par):
-                if in_zpar:
+            if (zpar or IN_zpar) and (par or IN_par):
+                if IN_zpar:
                     for col in data.columns:
-                        if in_zpar.lower() in col.lower():
+                        if IN_zpar.lower() in col.lower():
                             zpar = col
                             break
-                if in_par:
+                if IN_par:
                     for col in data.columns:
-                        if in_par.lower() in col.lower():
+                        if IN_par.lower() in col.lower():
                             par = col
                             break
                 if zpar not in data.columns or par not in data.columns:
@@ -119,10 +119,10 @@ class PackageCollection:
 
         return all_data or tot_df.sort_index()
 
-    def plot_data(self, zpar=None, par=None, **kwargs):
+    def plot_data(self, zpar=None, par=None, IN_zpar=None, IN_par=None, **kwargs):
         import matplotlib.pyplot as plt
 
-        df = self.get_data(zpar, par, **kwargs)
+        df = self.get_data(zpar=zpar, par=par, IN_zpar=IN_zpar, IN_par=IN_par, **kwargs)
         with plt.style.context('ggplot'):
             for col in df.columns:
                 plt.plot(df[col], -df.index, label=col)
