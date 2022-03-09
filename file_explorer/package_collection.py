@@ -82,6 +82,8 @@ class PackageCollection:
         import pandas as pd
         all_data = {}
         tot_df = None
+        unique_zpar = set()
+        unique_par = set()
         for pack in self.get_packages_matching(**kwargs):
             data = pack.get_data(**kwargs)
             if data is None:
@@ -99,6 +101,9 @@ class PackageCollection:
                             break
                 if zpar not in data.columns or par not in data.columns:
                     continue
+                unique_zpar.add(zpar)
+                unique_par.add(par)
+
                 df = pd.DataFrame()
                 df[zpar] = data[zpar]
                 if 'station' in kwargs:
@@ -115,6 +120,16 @@ class PackageCollection:
             else:
                 all_data[f"{pack('datetime')} - {pack('station')}"] = data
 
+        if tot_df is None:
+            raise Exception(f'No match for given parameters: zpar={zpar}, par={par}, IN_zpar={IN_zpar}, IN_par={IN_par}')
+
+        if len(unique_zpar) != 1:
+            print('Found several zpars:')
+            print(unique_zpar)
+        if len(unique_par) != 1:
+            print('Found several pars:')
+            print(unique_par)
+
         return all_data or tot_df.sort_index()
 
     def plot_data(self, zpar=None, par=None, IN_zpar=None, IN_par=None, **kwargs):
@@ -126,9 +141,11 @@ class PackageCollection:
                 plt.plot(df[col], -df.index, label=col)
             plt.legend(loc=3)
             if 'station' in kwargs:
-                plt.title(kwargs.get('station'))
-            plt.xlabel(par, fontsize=12)
-            plt.ylabel(zpar, fontsize=12)
+                plt.title(f'Station name: {kwargs.get("station")}')
+            elif 'IN_station' in kwargs:
+                plt.title(f'"{kwargs.get("""IN_station""")}" in station name')
+            plt.xlabel(par or f'"{IN_par}"', fontsize=12)
+            plt.ylabel(zpar or f'"{IN_zpar}"', fontsize=12)
             plt.show()
 
     def write_data_to_directory(self, directory, **kwargs):
