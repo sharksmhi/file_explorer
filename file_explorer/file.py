@@ -5,7 +5,7 @@ from pathlib import Path
 
 from file_explorer import mapping
 from file_explorer import utils
-from file_explorer.patterns import get_file_stem_match
+from file_explorer.patterns import get_file_name_match
 
 
 class InstrumentFile(ABC):
@@ -16,13 +16,18 @@ class InstrumentFile(ABC):
     _lines = None
     data = None
     package_instrument_type = None
+    encoding = 'cp1252'
 
-    def __init__(self, path, ignore_pattern=False):
+    def __init__(self, path, ignore_pattern=False, **kwargs):
         self.path = Path(path)
         self.ignore_pattern = ignore_pattern
         self._key = None
         self._path_info = {}
         self._attributes = {}
+
+        encoding_key = f'{self.suffix[1:]}_encoding'
+        self.encoding = kwargs.get(encoding_key) or self.encoding
+
         self._load_file()
         self._fixup()
         self._save_info_from_file()
@@ -127,7 +132,7 @@ class InstrumentFile(ABC):
         if self.path.suffix.lower() != self.suffix.lower():
             raise UnrecognizedFile(f'{self.path} does not have suffix {self.suffix}')
 
-        name_match = get_file_stem_match(self.path.name)
+        name_match = get_file_name_match(self.path.name)
         if name_match:
             self.name_match = name_match
             self._path_info.update(name_match.groupdict())

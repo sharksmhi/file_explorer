@@ -1,5 +1,7 @@
 
 def in_bbox(obj, lat_min=None, lat_max=None, lon_min=None, lon_max=None, **kwargs):
+    if not any([lat_min, lat_max, lon_min, lon_max]):
+        return True
     if not (obj.attributes.get('lat') and obj.attributes.get('lon')):
         return None
     lat = float(obj.attributes.get('lat'))
@@ -16,6 +18,8 @@ def in_bbox(obj, lat_min=None, lat_max=None, lon_min=None, lon_max=None, **kwarg
 
 
 def in_time_span(obj, before=None, before_equal=None, after=None, after_equal=None, **kwargs):
+    if not any([before, before_equal, after, after_equal]):
+        return True
     dtime = obj.attributes.get('datetime')
     if not dtime:
         return None
@@ -37,7 +41,6 @@ def is_matching(obj, **kwargs):
         return False
     if not in_time_span(obj, **kwargs):
         return False
-
     for key, value in kwargs.items():
         if 'KC_' in key:
             key = key.replace('KC_', '')
@@ -45,6 +48,8 @@ def is_matching(obj, **kwargs):
         if 'IN_' in key:
             key = key.replace('IN_', '')
             in_ = True
+        if key not in obj.attributes:
+            continue
         item = obj(key.lower())
         if item and not kc_:
             if isinstance(value, str):

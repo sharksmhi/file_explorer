@@ -12,7 +12,7 @@ FILE_NAME_PATTERNS = [
                                                         '(?P<minute>\d{2})',
                                                         '(?P<ship>\d{2}_\w{2})',
                                                         '(?P<serno>\d{4})',
-                                                        '(?P<tail>[a-z1-9\-_]*)?',
+                                                        '(?P<tail>[a-z0-9\-_]*)?',
                                                         '(?P<suffix>\w*)?'
                                                         )
                    ),
@@ -103,7 +103,7 @@ CRUISE_PATTERNS = [
 ]
 
 
-def get_file_stem_match(string):
+def get_file_name_match(string):
     for PATTERN in FILE_NAME_PATTERNS:
         name_match = PATTERN.search(string.lower())
         if name_match:
