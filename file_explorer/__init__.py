@@ -13,6 +13,7 @@ from file_explorer.package_collection import PackageCollection
 from file_explorer.seabird import BlFile
 from file_explorer.seabird import BtlFile
 from file_explorer.seabird import CnvFile
+from file_explorer.seabird import ConFile
 from file_explorer.seabird import HdrFile
 from file_explorer.seabird import HexFile
 from file_explorer.seabird import JpgFile
@@ -20,6 +21,7 @@ from file_explorer.seabird import RosFile
 from file_explorer.seabird import TxtFile
 from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import mvp_files
+from file_explorer.seabird import DatFile
 
 FILES = {
     'sbe': {
@@ -31,7 +33,11 @@ FILES = {
         BtlFile.suffix: BtlFile,
         HexFile.suffix: HexFile,
         RosFile.suffix: RosFile,
-        JpgFile.suffix: JpgFile
+        JpgFile.suffix: JpgFile,
+
+        ConFile.suffix: ConFile,
+        DatFile.suffix: DatFile
+
     },
     'mvp': {
         mvp_files.AscFile.suffix: mvp_files.AscFile,
@@ -46,7 +52,6 @@ FILES = {
         mvp_files.S10File.suffix: mvp_files.S10File,
         mvp_files.S12File.suffix: mvp_files.S12File,
         mvp_files.S52File.suffix: mvp_files.S52File,
-        # mvp_files.CnvFile.suffix: mvp_files.CnvFile,
         CnvFile.suffix: CnvFile,
     },
     'odv': {
