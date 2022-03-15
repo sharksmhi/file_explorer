@@ -120,5 +120,5 @@ def get_cruise_match(string):
 def get_cruise_match_dict(string):
     name_match = get_cruise_match(string)
     if not name_match:
-        return {}
+        return {'cruise': string}
     return name_match.groupdict()
