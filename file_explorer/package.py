@@ -140,7 +140,7 @@ class Package(Operations):
                          self('date'),
                          self('time'),
                          self('ship'),
-                         self('cruise'),
+                         self('cruise') or '00',
                          self('serno')]).upper()
 
     @property

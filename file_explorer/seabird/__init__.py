@@ -10,3 +10,4 @@ from .jpg_file import JpgFile
 from .ros_file import RosFile
 from .txt_file import TxtFile
 from .xmlcon_file import XmlconFile
+from .xml_file import XmlFile

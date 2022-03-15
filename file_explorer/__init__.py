@@ -22,6 +22,7 @@ from file_explorer.seabird import TxtFile
 from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import mvp_files
 from file_explorer.seabird import DatFile
+from file_explorer.seabird import XmlFile
 
 FILES = {
     'sbe': {
@@ -36,7 +37,8 @@ FILES = {
         JpgFile.suffix: JpgFile,
 
         ConFile.suffix: ConFile,
-        DatFile.suffix: DatFile
+        DatFile.suffix: DatFile,
+        XmlFile.suffix: XmlFile
 
     },
     'mvp': {
@@ -253,7 +255,6 @@ def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, 
         if not to_directory.exists():
             to_directory.mkdir(parents=True, exist_ok=True)
         path = Path(to_directory, f'unrecognized_files_for_instrument_type_{instrument_type}.txt')
-        print(path)
         with open(path, 'w') as fid:
             fid.write('=' * 30)
             fid.write('\n')

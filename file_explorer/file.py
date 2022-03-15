@@ -34,7 +34,7 @@ class InstrumentFile(ABC):
 
         self._attributes.update(self._path_info)
         self._attributes['suffix'] = self.suffix
-        self._attributes['cruise'] = '00'
+        # self._attributes['cruise'] = '00'
         self._attributes['datetime'] = self.datetime
         if self.datetime:
             self._attributes['date'] = self.datetime.strftime('%Y%m%d')
@@ -163,6 +163,8 @@ class InstrumentFile(ABC):
             self._path_info['year'] = mapping.get_year_mapping(self._path_info.get('year'))
             if 'ship' in self._path_info:
                 self._path_info['ship'] = mapping.get_ship_mapping(self._path_info['ship'])
+            if self._path_info.get('serno'):
+                self._path_info['serno'] = self._path_info['serno'].zfill(4)
 
     def get_proper_name(self):
         prefix = self('prefix') or ''

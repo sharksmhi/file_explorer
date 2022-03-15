@@ -39,10 +39,8 @@ class HdrFile(InstrumentFile):
                         self._header_form['info'].append(strip_line)
 
     def _save_attributes(self):
-
         self._attributes.update(dict((key.lower(), value) for key, value in self._header_form.items()))
         self._attributes.update(dict((key.lower(), value) for key, value in self._cruise_info.items()))
-        self._attributes.update(self._cruise_info)
         self._attributes['lat'] = self._lat
         self._attributes['lon'] = self._lon
         self._attributes['station'] = self._station

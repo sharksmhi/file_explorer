@@ -36,7 +36,7 @@ FILE_NAME_PATTERNS = [
         re.compile('^{}{}{}{}.{}$'.format('(?P<ship>\w{2})',
                                        '(?P<year>\d{2})',
                                        '(?P<midfix>u|d)',
-                                       '(?P<serno>\d{4})',
+                                       '(?P<serno>\d{3,4})',
                                        '(?P<suffix>\w*)?'
                                        )
                    ),

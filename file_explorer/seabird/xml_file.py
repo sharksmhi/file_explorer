@@ -1,9 +1,10 @@
+from file_explorer import mapping
 from file_explorer.file import InstrumentFile
 from file_explorer.seabird import xmlcon_parser
 
 
-class XmlconFile(InstrumentFile):
-    suffix = '.xmlcon'
+class XmlFile(InstrumentFile):
+    suffix = '.xml'
     _tree = None
     _sensor_info = None
 
@@ -18,11 +19,13 @@ class XmlconFile(InstrumentFile):
 
     @property
     def instrument_number(self):
-        return xmlcon_parser.get_instrument_number(self._tree)
+        data = xmlcon_parser.get_hardware_data(self._tree)
+        return data['SerialNumber']
 
     @property
     def instrument(self):
-        return xmlcon_parser.get_instrument(self._tree)
+        data = xmlcon_parser.get_hardware_data(self._tree)
+        return mapping.get_instrument_mapping(data['DeviceType'])
 
     @property
     def sensor_info(self):
