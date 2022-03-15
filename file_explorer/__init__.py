@@ -67,6 +67,7 @@ PACKAGES = {
 
 
 def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suffix=''):
+    """ Returns a list with all file paths in the given directory. Including all sub directories. """
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
     all_files = []
@@ -83,13 +84,18 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suf
     return all_files
 
 
+def _get_paths_in_directory(directory):
+    """ Returns a list with all file paths in the given directory """
+    return [path for path in Path(directory).iterdir() if path.is_file()]
+
+
 def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
     path = Path(path)
     file_cls = FILES.get(instrument_type).get(path.suffix.lower())
     if not file_cls:
-        return
+        return False
     try:
-        obj = file_cls(path)
+        obj = file_cls(path, **kwargs)
         if not utils.is_matching(obj, **kwargs):
             return None
         return obj
@@ -228,6 +234,47 @@ def get_merged_package_collections_for_packages(packages, merge_on=None, as_list
 def get_merged_package_collections_for_directory(directory, instrument_type='sbe', merge_on=None, **kwargs):
     packages = get_packages_in_directory(directory, as_list=True, instrument_type=instrument_type, **kwargs)
     return get_merged_package_collections_for_packages(packages, merge_on=merge_on, **kwargs)
+
+
+def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, save_file_to_directory=False, **kwargs):
+    if tree:
+        all_paths = _get_paths_in_directory_tree(directory)
+    else:
+        all_paths = _get_paths_in_directory(directory)
+
+    unrec_files = []
+    for path in all_paths:
+        obj = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
+        if not obj:
+            unrec_files.append(str(path))
+
+    if save_file_to_directory:
+        to_directory = Path(save_file_to_directory)
+        if not to_directory.exists():
+            to_directory.mkdir(parents=True, exist_ok=True)
+        path = Path(to_directory, f'unrecognized_files_for_instrument_type_{instrument_type}.txt')
+        print(path)
+        with open(path, 'w') as fid:
+            fid.write('=' * 30)
+            fid.write('\n')
+            fid.write(f'Unrecognized files for instrument_type "{instrument_type}" in directory:')
+            fid.write('\n')
+            fid.write(f'    {directory}')
+            fid.write('\n')
+            fid.write('-' * 30)
+            fid.write('\n')
+            fid.write('\n'.join(sorted(unrec_files)))
+    else:
+        print('=' * 50)
+        print(f'Unrecognized files for instrument_type "{instrument_type}" in directory:')
+        print(f'    {directory}')
+        print('-' * 50)
+        for path in sorted(unrec_files):
+            print(path)
+        print('-' * 50)
+        print()
+
+
 
 
 
