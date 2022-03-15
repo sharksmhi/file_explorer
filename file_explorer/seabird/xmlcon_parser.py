@@ -23,6 +23,7 @@ def get_sensor_info(tree):
     if not sensors:
         sensors = root.findall('sensor')
 
+    ii = 0
     for i, sensor in enumerate(sensors):
         children = list(sensor)
         if not children:
@@ -33,12 +34,13 @@ def get_sensor_info(tree):
         if nr is None:
             nr = ''
         index.setdefault(par, [])
-        index[par].append(i)
+        index[par].append(ii)
         data = {'parameter': par,
                 'serial_number': nr,
                 'name': par}
         sensor_info.append(data)
-
+        ii += 1
+# list(cnv._xml_tree.findall('sensor')[0])[0]
     for par, index_list in index.items():
         if len(index_list) == 1:
             continue
