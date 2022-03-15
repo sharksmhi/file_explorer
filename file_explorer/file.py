@@ -1,11 +1,11 @@
-from pathlib import Path
-from abc import ABC, abstractmethod
 import datetime
 import hashlib
+from abc import ABC, abstractmethod
+from pathlib import Path
 
-from file_explorer.patterns import get_file_stem_match
 from file_explorer import mapping
 from file_explorer import utils
+from file_explorer.patterns import get_file_stem_match
 
 
 class InstrumentFile(ABC):
@@ -44,10 +44,12 @@ class InstrumentFile(ABC):
     def datetime(self):
         return self._get_datetime()
 
+    @abstractmethod
     def _save_info_from_file(self):
         # Overwrite this in subclasses
         pass
 
+    @abstractmethod
     def _save_attributes(self):
         # Overwrite this in subclasses
         pass

@@ -1,5 +1,6 @@
-from file_explorer.package import Package
 from file_explorer import utils
+from file_explorer.package import Package
+
 
 class PackageCollection:
 

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from file_explorer.file import InstrumentFile
-
 from file_explorer.seabird import xmlcon_parser
 
 

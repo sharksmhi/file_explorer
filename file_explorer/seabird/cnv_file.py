@@ -1,9 +1,7 @@
-from pathlib import Path
 import datetime
 
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
-
 from file_explorer.seabird import xmlcon_parser
 
 
@@ -56,8 +54,6 @@ class CnvFile(InstrumentFile):
         xml_lines = ['<?xml version="1.0" encoding="UTF-8"?>\n']
         is_xml = False
 
-        header = True
-        has_set_value_length = False
         with open(self.path) as fid:
             for line in fid:
                 strip_line = line.strip()

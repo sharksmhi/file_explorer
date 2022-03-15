@@ -1,31 +1,25 @@
-from pathlib import Path
 import os
 import shutil
-
-from file_explorer.file import UnrecognizedFile
-
-from file_explorer.file import InstrumentFile
-from file_explorer.seabird import TxtFile
-from file_explorer.seabird import CnvFile
-from file_explorer.seabird import XmlconFile
-from file_explorer.seabird import HdrFile
-from file_explorer.seabird import BlFile
-from file_explorer.seabird import BtlFile
-from file_explorer.seabird import HexFile
-from file_explorer.seabird import RosFile
-from file_explorer.seabird import JpgFile
-
-from file_explorer.seabird import mvp_files
-
-from file_explorer.odv import odv_file
-
-from file_explorer.package import Package
-from file_explorer.package import MvpPackage
-from file_explorer.package import OdvPackage
-
-from file_explorer.package_collection import PackageCollection
+from pathlib import Path
 
 from file_explorer import utils
+from file_explorer.file import InstrumentFile
+from file_explorer.file import UnrecognizedFile
+from file_explorer.odv import odv_file
+from file_explorer.package import MvpPackage
+from file_explorer.package import OdvPackage
+from file_explorer.package import Package
+from file_explorer.package_collection import PackageCollection
+from file_explorer.seabird import BlFile
+from file_explorer.seabird import BtlFile
+from file_explorer.seabird import CnvFile
+from file_explorer.seabird import HdrFile
+from file_explorer.seabird import HexFile
+from file_explorer.seabird import JpgFile
+from file_explorer.seabird import RosFile
+from file_explorer.seabird import TxtFile
+from file_explorer.seabird import XmlconFile
+from file_explorer.seabird import mvp_files
 
 FILES = {
     'sbe': {

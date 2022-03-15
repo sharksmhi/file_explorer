@@ -24,8 +24,6 @@ def get_sensor_info(tree):
         sensors = root.findall('sensor')
 
     for i, sensor in enumerate(sensors):
-        # print(sensors)
-        # children = sensor.getchildren()
         children = list(sensor)
         if not children:
             continue
