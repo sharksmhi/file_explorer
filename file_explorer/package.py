@@ -51,7 +51,7 @@ class Package(Operations):
     Class to hold several seabird files with the same filename structure.
     """
     INSTRUMENT_TYPE = 'sbe'
-    RAW_FILES_EXTENSIONS = ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con']
+    RAW_FILES_EXTENSIONS = ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.xml']
 
     def __init__(self, attributes=None):
         self._files = []

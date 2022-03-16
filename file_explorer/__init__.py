@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+import logging
 
 from file_explorer import utils
 from file_explorer.file import InstrumentFile
@@ -23,6 +24,8 @@ from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import mvp_files
 from file_explorer.seabird import DatFile
 from file_explorer.seabird import XmlFile
+
+logger = logging.getLogger(__name__)
 
 FILES = {
     'sbe': {
@@ -61,6 +64,8 @@ FILES = {
     }
 }
 
+logger.debug(f'instrument_types are: {", ".join(list(FILES))}')
+
 PACKAGES = {
     Package.INSTRUMENT_TYPE: Package,
     MvpPackage.INSTRUMENT_TYPE: MvpPackage,
@@ -72,6 +77,10 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suf
     """ Returns a list with all file paths in the given directory. Including all sub directories. """
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
+    logger.debug('_get_paths_in_directory_tree')
+    logger.debug(f'directory is set to: {suffix}')
+    logger.debug(f'stem is set to: {suffix}')
+    logger.debug(f'suffix is set to: {suffix}')
     all_files = []
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in files:
@@ -82,30 +91,40 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suf
                 continue
             all_files.append(path)
     if exclude_directory:
+        logger.debug(f'exclude_directory is set to: {suffix}')
         all_files = [path for path in all_files if exclude_directory not in path.parts]
     return all_files
 
 
 def _get_paths_in_directory(directory):
     """ Returns a list with all file paths in the given directory """
+    logger.debug('_get_paths_in_directory')
     return [path for path in Path(directory).iterdir() if path.is_file()]
 
 
 def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
+    logger.debug('get_file_object_for_path')
     path = Path(path)
-    file_cls = FILES.get(instrument_type).get(path.suffix.lower())
+    itype = FILES.get(instrument_type)
+    if not itype:
+        raise KeyError(f'Unknown instrument_type: {instrument_type}')
+    file_cls = itype.get(path.suffix.lower())
     if not file_cls:
+        logger.info(f'Unknown suffix for instrument_type: {path}')
         return False
     try:
         obj = file_cls(path, **kwargs)
         if not utils.is_matching(obj, **kwargs):
+            logger.debug(f'File not matching filter: {path}')
             return None
         return obj
     except UnrecognizedFile:
+        logger.warning(f'Suffix is known but still cant handle file: {path}')
         return False
 
 
 def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, **kwargs):
+    logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
         file = get_file_object_for_path(path, instrument_type=instrument_type)
@@ -115,12 +134,14 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
         pack.add_file(file)
+    logger.info('Setting key in packages')
     for pack in packages.values():
         pack.set_key()
     return packages
 
 
 def get_packages_in_directory(directory, as_list=False, **kwargs):
+    logger.debug('get_packages_in_directory')
     all_files = _get_paths_in_directory_tree(directory)
     packages = get_packages_from_file_list(all_files, **kwargs)
     if as_list:
@@ -129,6 +150,7 @@ def get_packages_in_directory(directory, as_list=False, **kwargs):
 
 
 def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs):
+    logger.debug('get_package_for_file')
     if isinstance(path, InstrumentFile):
         path = path.path
     elif isinstance(path, Package):
@@ -136,16 +158,20 @@ def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs)
     path = Path(path)
     if not directory:
         directory = path.parent
+    logger.info(f'Looking for files in directory: {directory}')
     all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
     packages = get_packages_from_file_list(all_files, **kwargs)
     return packages[path.stem]
 
 
 def get_file_names_in_directory(directory, suffix=None):
+    logger.debug('get_file_names_in_directory')
+    suffix = suffix or 'hex'
+    logger.info(f'Getting files with suffix: {suffix}')
     packages = get_packages_in_directory(directory)
     paths = []
     for pack in packages.values():
-        path = pack[suffix or 'hex']
+        path = pack[suffix]
         if not path:
             continue
         if suffix:
@@ -156,6 +182,7 @@ def get_file_names_in_directory(directory, suffix=None):
 
 
 def update_package_with_files_in_directory(package, directory, exclude_directory=None, replace=False):
+    logger.debug('update_package_with_files_in_directory')
     # all_files = Path(directory).glob('**/*')
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
     for path in all_files:
@@ -167,12 +194,14 @@ def update_package_with_files_in_directory(package, directory, exclude_directory
 
 
 def rename_file_object(file_object, overwrite=False):
+    logger.debug('update_package_with_files_in_directory')
     current_path = file_object.path
     proper_path = file_object.get_proper_path()
     if proper_path == current_path:
         return file_object
     if proper_path.exists():
         if not overwrite:
+            logger.error(f'Overwrite is set to {overwrite}')
             raise FileExistsError(proper_path)
         os.remove(proper_path)
     current_path.rename(proper_path)
@@ -180,6 +209,7 @@ def rename_file_object(file_object, overwrite=False):
 
 
 def copy_file_object(file_object, directory=None, overwrite=False):
+    logger.debug('copy_file_object')
     current_path = file_object.path
     if directory:
         target_path = Path(directory, file_object.get_proper_name())
@@ -196,6 +226,7 @@ def copy_file_object(file_object, directory=None, overwrite=False):
 
 
 def rename_package(package, overwrite=False):
+    logger.debug('rename_package')
     if not isinstance(package, Package):
         raise Exception('Given package is not a Package class')
     package.set_key()
@@ -206,6 +237,7 @@ def rename_package(package, overwrite=False):
 
 
 def copy_package(package, overwrite=False):
+    logger.debug('copy_package')
     if not isinstance(package, Package):
         raise Exception('Given package is not a Package class')
     package.set_key()
@@ -216,12 +248,14 @@ def copy_package(package, overwrite=False):
 
 
 def get_package_collection_for_directory(directory, instrument_type='sbe', **kwargs):
+    logger.debug('get_package_collection_for_directory')
     path = Path(directory)
     packages = get_packages_in_directory(directory, as_list=True, instrument_type=instrument_type, **kwargs)
     return PackageCollection(name=path.name, packages=packages)
 
 
 def get_merged_package_collections_for_packages(packages, merge_on=None, as_list=False, **kwargs):
+    logger.debug('get_merged_package_collections_for_packages')
     collections = {}
     for pack in packages:
         key = pack(merge_on) or 'unknown'
@@ -234,11 +268,14 @@ def get_merged_package_collections_for_packages(packages, merge_on=None, as_list
 
 
 def get_merged_package_collections_for_directory(directory, instrument_type='sbe', merge_on=None, **kwargs):
+    logger.debug('get_merged_package_collections_for_directory')
     packages = get_packages_in_directory(directory, as_list=True, instrument_type=instrument_type, **kwargs)
     return get_merged_package_collections_for_packages(packages, merge_on=merge_on, **kwargs)
 
 
 def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, save_file_to_directory=False, **kwargs):
+    logger.debug('list_unrecognized_files_in_directory')
+    logger.info(f'tree is set to {tree}')
     if tree:
         all_paths = _get_paths_in_directory_tree(directory)
     else:
