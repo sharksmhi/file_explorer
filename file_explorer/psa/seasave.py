@@ -21,20 +21,11 @@ class SeasavePSAfile(PSAfileWithPlot):
         self.lat_tags = ['Settings', 'HeaderForm', 'Prompt{{index==4}}']
         self.lon_tags = ['Settings', 'HeaderForm', 'Prompt{{index==5}}']
         # self.pos_source_tags = ['Settings', 'HeaderForm', 'Prompt{{index==6}}']
-        self.event_id_tags = ['Settings', 'HeaderForm', 'Prompt{{index==6}}']
-        self.parent_event_id_tags = ['Settings', 'HeaderForm', 'Prompt{{index==7}}']
+        self.pump_tags = ['Settings', 'HeaderForm', 'Prompt{{index==6}}']
+        self.id_tags = ['Settings', 'HeaderForm', 'Prompt{{index==7}}']
         self.add_samp_tags = ['Settings', 'HeaderForm', 'Prompt{{index==8}}']
         self.metadata_admin_tags = ['Settings', 'HeaderForm', 'Prompt{{index==9}}']
         self.metadata_conditions_tags = ['Settings', 'HeaderForm', 'Prompt{{index==10}}']
-
-        # self.display_depth_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
-        #             'Axis{{Calc;FullName;value==Scan Count}}', 'MaximumValue']
-        #
-        # self.display_nr_bins_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
-        #                              'Axis{{Calc;FullName;value==Scan Count}}', 'MajorDivisions']
-        #
-        # self.display_nr_minor_bins_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
-        #                              'Axis{{Calc;FullName;value==Scan Count}}', 'MinorDivisions']
 
         self.display_depth_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
                                    'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MaximumValue']
@@ -44,8 +35,6 @@ class SeasavePSAfile(PSAfileWithPlot):
 
         self.display_nr_minor_bins_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
                                            'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MinorDivisions']
-
-
 
         self.display_parameter_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes', 'Axis']
 
@@ -144,25 +133,29 @@ class SeasavePSAfile(PSAfileWithPlot):
         # source_element.set('value', f'Position source: {position[2]}')
 
     @property
-    def event_id(self):
-        element = self._get_element_from_tag_list(self.event_id_tags)
-        return element.get('value')
+    def pumps(self):
+        element = self._get_element_from_tag_list(self.pump_tags)
+        string = element.get('value')
+        return utils.metadata_string_to_dict(string.split(':', 1)[-1].strip())
 
-    @event_id.setter
-    def event_id(self, id):
-        element = self._get_element_from_tag_list(self.event_id_tags)
-        value = f'EventID: {id}'
+    @pumps.setter
+    def pumps(self, pump_ids):
+        string = utils.metadata_dict_to_string(pump_ids)
+        element = self._get_element_from_tag_list(self.pump_tags)
+        value = f'Pumps: {string}'
         element.set('value', value)
 
     @property
-    def parent_event_id(self):
-        element = self._get_element_from_tag_list(self.parent_event_id_tags)
-        return element.get('value')
+    def event_ids(self):
+        element = self._get_element_from_tag_list(self.id_tags)
+        string = element.get('value')
+        return utils.metadata_string_to_dict(string.split(':', 1)[-1].strip())
 
-    @parent_event_id.setter
-    def parent_event_id(self, id):
-        element = self._get_element_from_tag_list(self.parent_event_id_tags)
-        value = f'Parent EventID: {id}'
+    @event_ids.setter
+    def event_ids(self, event_ids):
+        string = utils.metadata_dict_to_string(event_ids)
+        element = self._get_element_from_tag_list(self.id_tags)
+        value = f'EventIDs: {string}'
         element.set('value', value)
 
     @property
