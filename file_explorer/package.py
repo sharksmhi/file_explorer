@@ -150,7 +150,7 @@ class Package(Operations):
                     date=self('date'),
                     time=self('time'),
                     ship=self('ship'),
-                    cruise=self('cruise'),
+                    cruise=self('cruise') or '00',
                     serno=self('serno'))
 
     def add_file(self, file, replace=False):

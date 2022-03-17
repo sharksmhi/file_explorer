@@ -9,7 +9,6 @@ from file_explorer.patterns import get_file_name_match
 
 
 class InstrumentFile(ABC):
-    path = None
     suffix = None
     _path_info = {}
     _attributes = {}
@@ -19,7 +18,7 @@ class InstrumentFile(ABC):
     encoding = 'cp1252'
 
     def __init__(self, path, ignore_pattern=False, **kwargs):
-        self.path = Path(path)
+        self._path = Path(path)
         self.ignore_pattern = ignore_pattern
         self._key = None
         self._path_info = {}
@@ -34,12 +33,11 @@ class InstrumentFile(ABC):
 
         self._attributes.update(self._path_info)
         self._attributes['suffix'] = self.suffix
+        self._attributes['path'] = str(self.path)
+        self._attributes['name'] = self.name
         # self._attributes['cruise'] = '00'
-        self._attributes['datetime'] = self.datetime
-        if self.datetime:
-            self._attributes['date'] = self.datetime.strftime('%Y%m%d')
-            self._attributes['time'] = self.datetime.strftime('%H%M')
         self._save_attributes()
+        self._add_and_map_attributes()
 
     def _get_datetime(self):
         # Overwrite this in subclasses if needed
@@ -101,6 +99,10 @@ class InstrumentFile(ABC):
     @key.setter
     def key(self, key):
         self._key = key
+
+    @property
+    def path(self):
+        return self._path
 
     @property
     def name(self):
@@ -166,9 +168,20 @@ class InstrumentFile(ABC):
             if self._path_info.get('serno'):
                 self._path_info['serno'] = self._path_info['serno'].zfill(4)
 
+    def _add_and_map_attributes(self):
+        self._attributes['datetime'] = self.datetime
+        if self.datetime:
+            self._attributes['date'] = self.datetime.strftime('%Y-%m-%d')
+            self._attributes['time'] = self.datetime.strftime('%H:%M')
+        if self._attributes.get('ship'):
+            self._attributes['ship'] = mapping.get_ship_mapping(self._attributes['ship'])
+
     def get_proper_name(self):
         prefix = self('prefix') or ''
         tail = self('tail') or ''
+        print('-'*50)
+        print(self.path)
+        print(self.key)
         return f'{prefix + self.key + tail}{self.suffix}'
 
     def get_proper_path(self, directory=None):

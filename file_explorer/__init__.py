@@ -154,13 +154,17 @@ def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs)
     if isinstance(path, InstrumentFile):
         path = path.path
     elif isinstance(path, Package):
+        print('KEY', path.key)
         path = path.files[0].path
     path = Path(path)
+    print('PATH', path)
     if not directory:
         directory = path.parent
+    print('DIRECTORY', directory)
     logger.info(f'Looking for files in directory: {directory}')
     all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
     packages = get_packages_from_file_list(all_files, **kwargs)
+    print(packages)
     return packages[path.stem]
 
 

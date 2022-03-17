@@ -1,5 +1,6 @@
 import datetime
 
+from file_explorer import mapping
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
 from file_explorer.seabird import xmlcon_parser
