@@ -184,9 +184,6 @@ class InstrumentFile(ABC):
     def get_proper_name(self):
         prefix = self('prefix') or ''
         tail = self('tail') or ''
-        print('-'*50)
-        print(self.path)
-        print(self.key)
         return f'{prefix + self.key + tail}{self.suffix}'
 
     def get_proper_path(self, directory=None):

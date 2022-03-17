@@ -162,10 +162,23 @@ def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs)
         directory = path.parent
     print('DIRECTORY', directory)
     logger.info(f'Looking for files in directory: {directory}')
-    all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
+    # all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
+    all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
     packages = get_packages_from_file_list(all_files, **kwargs)
     print(packages)
+    # for pack in packages.values():
+    #     for file in pack.files:
+    #         print('='*10)
+    #         print(path)
+    #         print(file.path)
+    #         if file.path.samefile(path):
+    #             return pack
     return packages[path.stem]
+
+def get_package_for_key(key, directory=None, exclude_directory=None, **kwargs):
+    all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory, **kwargs)
+    packages = get_packages_from_file_list(all_files, **kwargs)
+    return packages.get(key)
 
 
 def get_file_names_in_directory(directory, suffix=None):
@@ -194,6 +207,7 @@ def update_package_with_files_in_directory(package, directory, exclude_directory
         if not file:
             continue
         file.package_instrument_type = package.INSTRUMENT_TYPE
+        # print('PACKAGE', package.key)
         package.add_file(file, replace=replace)
 
 
