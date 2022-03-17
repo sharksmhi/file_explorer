@@ -137,8 +137,7 @@ class Package(Operations):
             return None
         return '_'.join([self('instrument'),
                          self('instrument_number'),
-                         self('date'),
-                         self('time'),
+                         self('datetime').strftime('%Y%m%d_%H%M'),
                          self('ship'),
                          self('cruise') or '00',
                          self('serno')]).upper()
@@ -147,8 +146,7 @@ class Package(Operations):
     def key_info(self):
         return dict(instrument=self('instrument'),
                     instrument_number=self('instrument_number'),
-                    date=self('date'),
-                    time=self('time'),
+                    datetime=self('datetime'),
                     ship=self('ship'),
                     cruise=self('cruise') or '00',
                     serno=self('serno'))
