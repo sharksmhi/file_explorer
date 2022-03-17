@@ -175,6 +175,11 @@ class InstrumentFile(ABC):
             self._attributes['time'] = self.datetime.strftime('%H:%M')
         if self._attributes.get('ship'):
             self._attributes['ship'] = mapping.get_ship_mapping(self._attributes['ship'])
+        if self._attributes.get('additional sampling'):
+            self._attributes['add_smp'] = self._attributes.get('additional sampling')
+        if self._attributes.get('instrument') and self._attributes.get('instrument_number'):
+            self._attributes['instrument_serie'] = self._attributes.get('instrument_number')
+            self._attributes['instrument_id'] = f"{self._attributes.get('instrument')}{self._attributes.get('instrument_number')}".upper()
 
     def get_proper_name(self):
         prefix = self('prefix') or ''
