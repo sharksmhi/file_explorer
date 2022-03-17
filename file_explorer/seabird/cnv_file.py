@@ -59,7 +59,6 @@ class CnvFile(InstrumentFile):
 
         with open(self.path) as fid:
             for line in fid:
-                strip_line = line.strip()
 
                 # General header info
                 if line.startswith('* System UTC'):
@@ -77,11 +76,6 @@ class CnvFile(InstrumentFile):
                 if line.startswith('**'):
                     attrs = utils.get_dict_from_header_form_line(line)
                     self._header_form.update(attrs)
-                    # if line.count(':') == 1:
-                    #     key, value = [part.strip() for part in line.strip().strip('*').split(':')]
-                    #     self._header_form[key] = value
-                    # else:
-                    #     self._header_form['info'].append(strip_line)
                 # XML
                 if line.startswith('# <Sensors count'):
                     is_xml = True

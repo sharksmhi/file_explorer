@@ -127,7 +127,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
-        file = get_file_object_for_path(path, instrument_type=instrument_type)
+        file = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
         if not file or not utils.is_matching(file, **kwargs):
             continue
         PACK = PACKAGES.get(instrument_type)
