@@ -5,6 +5,8 @@ from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
 from file_explorer.seabird import xmlcon_parser
 
+from file_explorer.seabird import utils
+
 
 class CnvFile(InstrumentFile):
     suffix = '.cnv'
@@ -73,11 +75,13 @@ class CnvFile(InstrumentFile):
 
                 # Header form
                 if line.startswith('**'):
-                    if line.count(':') == 1:
-                        key, value = [part.strip() for part in line.strip().strip('*').split(':')]
-                        self._header_form[key] = value
-                    else:
-                        self._header_form['info'].append(strip_line)
+                    attrs = utils.get_dict_from_header_form_line(line)
+                    self._header_form.update(attrs)
+                    # if line.count(':') == 1:
+                    #     key, value = [part.strip() for part in line.strip().strip('*').split(':')]
+                    #     self._header_form[key] = value
+                    # else:
+                    #     self._header_form['info'].append(strip_line)
                 # XML
                 if line.startswith('# <Sensors count'):
                     is_xml = True
