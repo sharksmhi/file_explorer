@@ -24,6 +24,8 @@ from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import mvp_files
 from file_explorer.seabird import DatFile
 from file_explorer.seabird import XmlFile
+from file_explorer.seabird import ZipFile
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,9 @@ FILES = {
 
         ConFile.suffix: ConFile,
         DatFile.suffix: DatFile,
-        XmlFile.suffix: XmlFile
+        XmlFile.suffix: XmlFile,
+
+        ZipFile.suffix: ZipFile,
 
     },
     'mvp': {
@@ -154,26 +158,16 @@ def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs)
     if isinstance(path, InstrumentFile):
         path = path.path
     elif isinstance(path, Package):
-        print('KEY', path.key)
         path = path.files[0].path
     path = Path(path)
-    print('PATH', path)
     if not directory:
         directory = path.parent
-    print('DIRECTORY', directory)
     logger.info(f'Looking for files in directory: {directory}')
     # all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
     packages = get_packages_from_file_list(all_files, **kwargs)
-    print(packages)
-    # for pack in packages.values():
-    #     for file in pack.files:
-    #         print('='*10)
-    #         print(path)
-    #         print(file.path)
-    #         if file.path.samefile(path):
-    #             return pack
     return packages[path.stem]
+
 
 def get_package_for_key(key, directory=None, exclude_directory=None, **kwargs):
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory, **kwargs)

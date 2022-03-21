@@ -11,3 +11,4 @@ from .ros_file import RosFile
 from .txt_file import TxtFile
 from .xmlcon_file import XmlconFile
 from .xml_file import XmlFile
+from .zip_file import ZipFile

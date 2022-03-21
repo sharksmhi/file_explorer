@@ -1,6 +1,7 @@
 from pathlib import Path
 import datetime
 import os
+import shutil
 
 
 class SBEPaths:
@@ -19,6 +20,24 @@ class SBEPaths:
         if create and not path.exists():
             os.makedirs(str(path))
         return path
+
+    def _clean_temp_folder(self):
+        """ Deletes old files in the temp folder """
+        if not self.get_local_directory('temp').exists():
+            return
+        now = datetime.datetime.now()
+        dt = datetime.timedelta(days=2)
+        for path in self.get_local_directory('temp').iterdir():
+            unix_time = os.path.getmtime(path)
+            t = datetime.datetime.fromtimestamp(unix_time)
+            if t < now-dt:
+                try:
+                    if path.is_file():
+                        os.remove(path)
+                    else:
+                        shutil.rmtree(path)
+                except PermissionError:
+                    pass
 
     @property
     def year(self):
@@ -91,6 +110,8 @@ class SBEPaths:
         self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], 'cnv', 'up_cast')
         self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], 'data')
         self._paths['local_dir_plot'] = Path(self._paths['local_dir_root'], 'plots')
+
+        self._clean_temp_folder()
 
     def set_server_root_directory(self, directory):
         print('set_server_root_directory', directory)
