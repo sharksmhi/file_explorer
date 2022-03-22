@@ -7,6 +7,9 @@ def get_dict_from_header_form_line(line):
 
     result = dict()
     strip_line = line.strip().split('** ')[-1]
+    if ':' not in strip_line:
+        result['info'] = strip_line.strip()
+        return result
     key, value = strip_line.split(':', 1)
     result[key.strip()] = value.strip()
 

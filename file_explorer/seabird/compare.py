@@ -2,7 +2,13 @@ from .xmlcon_file import XmlconFile
 from file_explorer.psa.datcnv import DatCnvPSAfile
 
 
-def get_datcnv_and_xmlcon_pars_mismatch(datcnv, xmlcon):
+class MismatchWarning(Exception):
+    def __init__(self, data=None):
+        super().__init__()
+        self.data = data
+
+
+def get_datcnv_and_xmlcon_pars_mismatch(datcnv=None, xmlcon=None):
     dc = DatCnvPSAfile(datcnv)
     xml = XmlconFile(xmlcon)
 
