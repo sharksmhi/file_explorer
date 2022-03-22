@@ -127,7 +127,7 @@ def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
         return False
 
 
-def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, **kwargs):
+def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, as_list=False, **kwargs):
     logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
@@ -141,15 +141,15 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     logger.info('Setting key in packages')
     for pack in packages.values():
         pack.set_key()
+    if as_list:
+        packages = list(packages.values())
     return packages
 
 
 def get_packages_in_directory(directory, as_list=False, **kwargs):
     logger.debug('get_packages_in_directory')
     all_files = _get_paths_in_directory_tree(directory)
-    packages = get_packages_from_file_list(all_files, **kwargs)
-    if as_list:
-        return list(packages.values())
+    packages = get_packages_from_file_list(all_files, as_list=as_list, **kwargs)
     return packages
 
 
@@ -163,10 +163,10 @@ def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs)
     if not directory:
         directory = path.parent
     logger.info(f'Looking for files in directory: {directory}')
-    # all_files = _get_paths_in_directory_tree(directory, stem=path.stem, exclude_directory=exclude_directory)
-    all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-    packages = get_packages_from_file_list(all_files, **kwargs)
-    return packages[path.stem]
+    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+    selected_paths = [p for p in all_paths if path.stem.lower() in p.stem.lower()]
+    packages = get_packages_from_file_list(selected_paths, as_list=True, **kwargs)
+    return packages[0]
 
 
 def get_package_for_key(key, directory=None, exclude_directory=None, **kwargs):
