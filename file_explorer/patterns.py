@@ -28,15 +28,16 @@ FILE_NAME_PATTERNS = [
                                                            '(?P<ship>\d{2}\w{2})',
                                                            '(?P<cruise>\d{2})',
                                                            '(?P<serno>\d{4})',
-                                                           '(?P<tail>[a-z1-9\-_]*)?',
+                                                           '(?P<tail>[a-z0-9\-_]*)?',
                                                            '(?P<suffix>\w*)?'
                                                            )
                    ),
         # Early utsjön
-        re.compile('^{}{}{}{}.{}$'.format('(?P<ship>\w{2})',
+        re.compile('^{}{}{}{}{}.{}$'.format('(?P<ship>\w{2})',
                                        '(?P<year>\d{2})',
                                        '(?P<midfix>u|d)',
                                        '(?P<serno>\d{3,4})',
+                                       '(?P<tail>[a-z0-9\-_]*)?',
                                        '(?P<suffix>\w*)?'
                                        )
                    ),
@@ -58,7 +59,7 @@ FILE_NAME_PATTERNS = [
                                                      '(?P<hour>\d{2})',
                                                      '(?P<minute>\d{2})',
                                                      '(?P<second>\d{2})',
-                                                     '(?P<transect>[a-z1-9\-_]*)',
+                                                     '(?P<transect>[a-z0-9\-_]*)',
                                                      '(?P<suffix>cnv)?'
                                                     )
                     ),
@@ -70,7 +71,7 @@ FILE_NAME_PATTERNS = [
                                                     '(?P<hour>\d{2})',
                                                     '(?P<minute>\d{2})',
                                                     '(?P<second>\d{2})',
-                                                    '(?P<tail>[a-z1-9\-_]*)?',
+                                                    '(?P<tail>[a-z0-9\-_]*)?',
                                                     '(?P<suffix>\w*)?'
                                                     )
                    ),

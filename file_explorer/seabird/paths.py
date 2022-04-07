@@ -9,7 +9,7 @@ class SBEPaths:
         self._paths = {}
         self._year = None
         self._sub_dir_list_local = ['source', 'raw', 'cnv', 'nsf', 'cnv_up', 'plot', 'temp']
-        self._sub_dir_list_server = ['raw', 'cnv', 'nsf', 'cnv_up']
+        self._sub_dir_list_server = ['raw', 'cnv', 'nsf', 'cnv_up', 'plot']
 
     def __call__(self, key, create=False, default=None, **kwargs):
         path = self._paths.get(key)
@@ -64,12 +64,12 @@ class SBEPaths:
     def get_path(self, key):
         return self._paths.get(key, None)
 
-    def get_local_directory(self, key, create=False, default=None):
+    def get_local_directory(self, key, year=None, create=False, default=None):
+        if year:
+            return self._get_local_directory_for_year(key, year, create=create)
         return self(self._local_key(key), create=create, default=default)
 
     def get_server_directory(self, key, year=None, create=False, default=None):
-        # if key not in self.server_sub_directories + ['root']:
-        #     return False
         if year:
             return self._get_server_directory_for_year(key, year, create=create)
         return self(self._server_key(key), create=create, default=default)
@@ -79,10 +79,18 @@ class SBEPaths:
             self.get_local_directory(key, create=True)
 
     def create_server_paths(self, year=None):
-        if not year:
-            year = datetime.datetime.now().year
+        # if not year:
+        #     year = datetime.datetime.now().year
         for key in self._sub_dir_list_server:
             self.get_server_directory(key, year=year, create=True)
+
+    def _get_local_directory_for_year(self, key, year, create=False):
+        if key not in self._sub_dir_list_server:
+            raise Exception(f'Invalid directory: {key}')
+        path = Path(self._paths['local_dir_root'], str(year), key)
+        if create and not path.exists():
+            os.makedirs(path)
+        return path
 
     def _get_server_directory_for_year(self, key, year, create=False):
         if key not in self._sub_dir_list_server:
@@ -96,33 +104,58 @@ class SBEPaths:
         self._paths['config_dir'] = Path(path)
         self._paths['instrumentinfo_file'] = Path(self._paths['config_dir'], 'Instruments.xlsx')
 
-    def set_local_root_directory(self, directory):
+    def set_source_directory(self, path):
+        path = Path(path)
+        if not path.is_dir():
+            raise NotADirectoryError(path)
+        self._paths['local_dir_source'] = Path(path)
+
+    def old_set_local_root_directory(self, directory):
         root_directory = Path(directory)
-        if root_directory.name == 'data':
+        if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'standard_format', 'plots']:
             root_directory = root_directory.parent
         self._paths['local_dir_root'] = root_directory
         self._paths['working_dir'] = Path(self._paths['local_dir_root'], 'temp')
-        self._paths['local_dir_temp'] = self._paths['working_dir'] 
+        self._paths['local_dir_temp'] = self._paths['working_dir']
         self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], 'source')
         self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], 'raw')
         self._paths['local_dir_cnv'] = Path(self._paths['local_dir_root'], 'cnv')
         self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], 'cnv', 'up_cast')
-        self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], 'data')
+        self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], 'standard_format')
         self._paths['local_dir_plot'] = Path(self._paths['local_dir_root'], 'plots')
 
         self._clean_temp_folder()
 
+    def set_local_root_directory(self, directory):
+        root_directory = Path(directory)
+        if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'standard_format', 'plots']:
+            root_directory = root_directory.parent
+        self._paths['local_dir_root'] = root_directory
+        self.set_year()
+        self._clean_temp_folder()
+
     def set_server_root_directory(self, directory):
-        print('set_server_root_directory', directory)
-        self._paths['server_dir_root'] = Path(directory)
+        root_directory = Path(directory)
+        if root_directory.name in ['raw', 'cnv', 'standard_format']:
+            root_directory = root_directory.parent
+        self._paths['server_dir_root'] = root_directory
         self.set_year()
 
     def set_year(self, year=None):
-        """ Year is neaded to set sub directories for the different filtypes """
-        if year:
-            self._year = str(year)
-        if self._year and self._paths.get('server_dir_root'):
+        """ Year is needed to set sub directories for the different filetypes """
+        self._year = str(year or self._year or datetime.datetime.now().year)
+        if self._paths.get('server_dir_root'):
             self._paths['server_dir_raw'] = Path(self._paths['server_dir_root'], self._year, 'raw')
             self._paths['server_dir_cnv'] = Path(self._paths['server_dir_root'], self._year, 'cnv')
-            self._paths['server_dir_nsf'] = Path(self._paths['server_dir_root'], self._year, 'data')
-            self._paths['server_dir_cnv_up'] = Path(self._paths['server_dir_root'], self._year, 'cnv_up')
+            self._paths['server_dir_nsf'] = Path(self._paths['server_dir_root'], self._year, 'standard_format')
+            self._paths['server_dir_cnv_up'] = Path(self._paths['server_dir_root'], self._year, 'cnv', 'up_cast')
+            self._paths['server_dir_plot'] = Path(self._paths['server_dir_root'], self._year, 'plots')
+        if self._paths.get('local_dir_root'):
+            self._paths['working_dir'] = Path(self._paths['local_dir_root'], self._year, 'temp')
+            self._paths['local_dir_temp'] = self._paths['working_dir']
+            self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], self._year, 'source')
+            self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], self._year, 'raw')
+            self._paths['local_dir_cnv'] = Path(self._paths['local_dir_root'], self._year, 'cnv')
+            self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], self._year, 'cnv', 'up_cast')
+            self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], self._year, 'standard_format')
+            self._paths['local_dir_plot'] = Path(self._paths['local_dir_root'], self._year, 'plots')
