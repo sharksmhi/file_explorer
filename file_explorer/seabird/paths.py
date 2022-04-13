@@ -79,13 +79,11 @@ class SBEPaths:
             self.get_local_directory(key, create=True)
 
     def create_server_paths(self, year=None):
-        # if not year:
-        #     year = datetime.datetime.now().year
         for key in self._sub_dir_list_server:
             self.get_server_directory(key, year=year, create=True)
 
     def _get_local_directory_for_year(self, key, year, create=False):
-        if key not in self._sub_dir_list_server:
+        if key not in self._sub_dir_list_local:
             raise Exception(f'Invalid directory: {key}')
         path = Path(self._paths['local_dir_root'], str(year), key)
         if create and not path.exists():
@@ -151,7 +149,7 @@ class SBEPaths:
             self._paths['server_dir_cnv_up'] = Path(self._paths['server_dir_root'], self._year, 'cnv', 'up_cast')
             self._paths['server_dir_plot'] = Path(self._paths['server_dir_root'], self._year, 'plots')
         if self._paths.get('local_dir_root'):
-            self._paths['working_dir'] = Path(self._paths['local_dir_root'], self._year, 'temp')
+            self._paths['working_dir'] = Path(self._paths['local_dir_root'], 'temp')
             self._paths['local_dir_temp'] = self._paths['working_dir']
             self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], self._year, 'source')
             self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], self._year, 'raw')
