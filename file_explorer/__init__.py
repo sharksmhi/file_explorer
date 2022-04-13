@@ -25,6 +25,7 @@ from file_explorer.seabird import mvp_files
 from file_explorer.seabird import DatFile
 from file_explorer.seabird import XmlFile
 from file_explorer.seabird import ZipFile
+from file_explorer.seabird import SensorinfoFile
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ FILES = {
         XmlFile.suffix: XmlFile,
 
         ZipFile.suffix: ZipFile,
+        SensorinfoFile.suffix: SensorinfoFile,
 
     },
     'mvp': {
@@ -221,6 +223,11 @@ def rename_file_object(file_object, overwrite=False):
 
 
 def copy_file_object(file_object, directory=None, overwrite=False):
+    """
+    Copy file in file_object into directory.
+    File will be renamed to its proper file name.
+    Returns new InstrumentFile object.
+    """
     logger.debug('copy_file_object')
     current_path = file_object.path
     if directory:
@@ -249,6 +256,10 @@ def rename_package(package, overwrite=False):
 
 
 def copy_package(package, overwrite=False):
+    """
+    Copy files in package to same location but with updated file names.
+    Returns new package containing the new files.
+    """
     logger.debug('copy_package')
     if not isinstance(package, Package):
         raise Exception('Given package is not a Package class')
@@ -258,6 +269,28 @@ def copy_package(package, overwrite=False):
         new_package.add_file(copy_file_object(file, overwrite=overwrite))
     return new_package
 
+
+def copy_package_files_to_directory(package, directory, overwrite=False):
+    """
+    Copy all files in package to given directory.
+    File names ar kept.
+    Returns a Package including the new file paths
+    """
+    logger.debug('copy_package_files_to_directory')
+    if not isinstance(package, Package):
+        raise Exception('Given package is not a Package class')
+    target_dir = Path(directory)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    paths = package.get_file_paths()
+    if any([target_dir.samefile(p.parent) for p in paths]):
+        raise NotADirectoryError('Can not copy files to existing file parent directory')
+    target_path = None
+    for source_path in paths:
+        target_path = Path(target_dir, source_path.name)
+        if target_path.exists() and not overwrite:
+            raise FileExistsError(target_path)
+        shutil.copy2(source_path, target_path)
+    return get_package_for_file(target_path)
 
 def get_package_collection_for_directory(directory, instrument_type='sbe', **kwargs):
     logger.debug('get_package_collection_for_directory')

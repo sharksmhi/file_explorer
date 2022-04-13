@@ -12,5 +12,6 @@ from .txt_file import TxtFile
 from .xmlcon_file import XmlconFile
 from .xml_file import XmlFile
 from .zip_file import ZipFile
+from .sensorinfo_file import SensorinfoFile
 
 from .compare import MismatchWarning
