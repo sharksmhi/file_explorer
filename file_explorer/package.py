@@ -193,6 +193,9 @@ class Package(Operations):
         file = self.get_file(**kwargs)
         return file.path
 
+    def get_file_paths(self):
+        return [file.path for file in self.files]
+
     def get_raw_files(self):
         return [file for file in self._files if file.suffix in self.RAW_FILES_EXTENSIONS]
 

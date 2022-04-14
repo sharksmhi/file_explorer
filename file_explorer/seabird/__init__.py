@@ -13,5 +13,7 @@ from .xmlcon_file import XmlconFile
 from .xml_file import XmlFile
 from .zip_file import ZipFile
 from .sensorinfo_file import SensorinfoFile
+from .metadata_file import MetadataFile
+from .deliverynote_file import DeliverynoteFile
 
 from .compare import MismatchWarning

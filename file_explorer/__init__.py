@@ -26,6 +26,8 @@ from file_explorer.seabird import DatFile
 from file_explorer.seabird import XmlFile
 from file_explorer.seabird import ZipFile
 from file_explorer.seabird import SensorinfoFile
+from file_explorer.seabird import MetadataFile
+from file_explorer.seabird import DeliverynoteFile
 
 
 logger = logging.getLogger(__name__)
@@ -48,6 +50,8 @@ FILES = {
 
         ZipFile.suffix: ZipFile,
         SensorinfoFile.suffix: SensorinfoFile,
+        MetadataFile.suffix: MetadataFile,
+        DeliverynoteFile.suffix: DeliverynoteFile,
 
     },
     'mvp': {
@@ -148,27 +152,31 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     return packages
 
 
-def get_packages_in_directory(directory, as_list=False, **kwargs):
+def get_packages_in_directory(directory, as_list=False, exclude_directory=None, **kwargs):
     logger.debug('get_packages_in_directory')
-    all_files = _get_paths_in_directory_tree(directory)
-    packages = get_packages_from_file_list(all_files, as_list=as_list, **kwargs)
+    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+    packages = get_packages_from_file_list(all_paths, as_list=as_list, **kwargs)
     return packages
 
 
-def get_package_for_file(path, directory=None, exclude_directory=None, **kwargs):
+def get_package_for_file(path, directory=None, exclude_directory=None, only_this_file=False, **kwargs):
     logger.debug('get_package_for_file')
     if isinstance(path, InstrumentFile):
         path = path.path
     elif isinstance(path, Package):
         path = path.files[0].path
     path = Path(path)
-    if not directory:
-        directory = path.parent
-    logger.info(f'Looking for files in directory: {directory}')
-    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-    selected_paths = [p for p in all_paths if path.stem.lower() in p.stem.lower()]
-    packages = get_packages_from_file_list(selected_paths, as_list=True, **kwargs)
-    return packages[0]
+    if only_this_file:
+        packages = get_packages_from_file_list([path], as_list=True, **kwargs)
+        return packages[0]
+    else:
+        if not directory:
+            directory = path.parent
+        logger.info(f'Looking for files in directory: {directory}')
+        all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+        selected_paths = [p for p in all_paths if path.stem.lower() in p.stem.lower()]
+        packages = get_packages_from_file_list(selected_paths, as_list=True, **kwargs)
+        return packages[0]
 
 
 def get_package_for_key(key, directory=None, exclude_directory=None, **kwargs):
@@ -255,42 +263,50 @@ def rename_package(package, overwrite=False):
     return new_package
 
 
-def copy_package(package, overwrite=False):
-    """
-    Copy files in package to same location but with updated file names.
-    Returns new package containing the new files.
-    """
-    logger.debug('copy_package')
-    if not isinstance(package, Package):
-        raise Exception('Given package is not a Package class')
-    package.set_key()
-    new_package = Package()
-    for file in package.files:
-        new_package.add_file(copy_file_object(file, overwrite=overwrite))
-    return new_package
+# def copy_package(package, overwrite=False):
+#     """
+#     Copy files in package to same location but with updated file names.
+#     Returns new package containing the new files.
+#     """
+#     logger.debug('copy_package')
+#     if not isinstance(package, Package):
+#         raise Exception('Given package is not a Package class')
+#     package.set_key()
+#     new_package = Package()
+#     for file in package.files:
+#         new_package.add_file(copy_file_object(file, overwrite=overwrite))
+#     return new_package
 
 
-def copy_package_files_to_directory(package, directory, overwrite=False):
+def copy_package_to_directory(pack, directory, overwrite=False, rename=False):
     """
     Copy all files in package to given directory.
-    File names ar kept.
+    Files are renamed if rename=True.
     Returns a Package including the new file paths
     """
     logger.debug('copy_package_files_to_directory')
-    if not isinstance(package, Package):
+    if not isinstance(pack, Package):
         raise Exception('Given package is not a Package class')
     target_dir = Path(directory)
     target_dir.mkdir(parents=True, exist_ok=True)
-    paths = package.get_file_paths()
+    paths = pack.get_file_paths()
     if any([target_dir.samefile(p.parent) for p in paths]):
         raise NotADirectoryError('Can not copy files to existing file parent directory')
     target_path = None
     for source_path in paths:
-        target_path = Path(target_dir, source_path.name)
+        if rename:
+            if not pack.key:
+                raise ValueError(f'Cant find key for package belonging to file: {source_path}')
+            target_path = Path(target_dir, f'{pack.key}{source_path.suffix}')
+        else:
+            target_path = Path(target_dir, source_path.name)
+        print('target:', target_path)
+        print('source', source_path)
         if target_path.exists() and not overwrite:
             raise FileExistsError(target_path)
         shutil.copy2(source_path, target_path)
     return get_package_for_file(target_path)
+
 
 def get_package_collection_for_directory(directory, instrument_type='sbe', **kwargs):
     logger.debug('get_package_collection_for_directory')

@@ -28,7 +28,8 @@ class SBEPaths:
         now = datetime.datetime.now()
         dt = datetime.timedelta(days=2)
         for path in self.get_local_directory('temp').iterdir():
-            unix_time = os.path.getmtime(path)
+            # unix_time = os.path.getmtime(path)
+            unix_time = os.path.getctime(path)
             t = datetime.datetime.fromtimestamp(unix_time)
             if t < now-dt:
                 try:
@@ -151,7 +152,7 @@ class SBEPaths:
         if self._paths.get('local_dir_root'):
             self._paths['working_dir'] = Path(self._paths['local_dir_root'], 'temp')
             self._paths['local_dir_temp'] = self._paths['working_dir']
-            self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], self._year, 'source')
+            # self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], self._year, 'source')
             self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], self._year, 'raw')
             self._paths['local_dir_cnv'] = Path(self._paths['local_dir_root'], self._year, 'cnv')
             self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], self._year, 'cnv', 'up_cast')
