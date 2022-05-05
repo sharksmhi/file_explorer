@@ -16,6 +16,23 @@ FILE_NAME_PATTERNS = [
                                                         '(?P<suffix>\w*)?'
                                                         )
                    ),
+        # New standard format test file
+        re.compile('^{}{}_{}_{}{}{}_{}{}_{}_{}_{}_{}{}.{}$'.format('(?P<prefix>u|d)?',
+                                                           '(?P<instrument>sbe\d{2})',
+                                                           '(?P<instrument_number>\d{4})',
+                                                           '(?P<year>\d{4})',
+                                                           '(?P<month>\d{2})',
+                                                           '(?P<day>\d{2})',
+                                                           '(?P<hour>\d{2})',
+                                                           '(?P<minute>\d{2})',
+                                                           '(?P<ship>\d{2}\w{2})',
+                                                           '(?P<cruise>\d{2})',
+                                                           '(?P<serno>\d{4})',
+                                                           '(?P<test>test)',
+                                                           '(?P<tail>[a-z0-9\-_]*)?',
+                                                           '(?P<suffix>\w*)?'
+                                                           )
+                   ),
         # New standard format
         re.compile('^{}{}_{}_{}{}{}_{}{}_{}_{}_{}{}.{}$'.format('(?P<prefix>u|d)?',
                                                            '(?P<instrument>sbe\d{2})',

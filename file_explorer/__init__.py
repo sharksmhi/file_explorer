@@ -202,6 +202,14 @@ def get_file_names_in_directory(directory, suffix=None):
     return paths
 
 
+def add_path_to_package(path, pack, replace=False):
+    file_obj = get_file_object_for_path(path)
+    if not file_obj:
+        return
+    file_obj.package_instrument_type = pack.INSTRUMENT_TYPE
+    pack.add_file(file_obj, replace=replace)
+
+
 def update_package_with_files_in_directory(package, directory, exclude_directory=None, replace=False):
     logger.debug('update_package_with_files_in_directory')
     # all_files = Path(directory).glob('**/*')
@@ -263,22 +271,7 @@ def rename_package(package, overwrite=False):
     return new_package
 
 
-# def copy_package(package, overwrite=False):
-#     """
-#     Copy files in package to same location but with updated file names.
-#     Returns new package containing the new files.
-#     """
-#     logger.debug('copy_package')
-#     if not isinstance(package, Package):
-#         raise Exception('Given package is not a Package class')
-#     package.set_key()
-#     new_package = Package()
-#     for file in package.files:
-#         new_package.add_file(copy_file_object(file, overwrite=overwrite))
-#     return new_package
-
-
-def copy_package_to_directory(pack, directory, overwrite=False, rename=False):
+def copy_package_to_directory(pack, directory, overwrite=False, rename=False, exclude_suffix=[], **kwargs):
     """
     Copy all files in package to given directory.
     Files are renamed if rename=True.
@@ -294,14 +287,14 @@ def copy_package_to_directory(pack, directory, overwrite=False, rename=False):
         raise NotADirectoryError('Can not copy files to existing file parent directory')
     target_path = None
     for source_path in paths:
+        if source_path.suffix in exclude_suffix:
+            continue
         if rename:
             if not pack.key:
                 raise ValueError(f'Cant find key for package belonging to file: {source_path}')
             target_path = Path(target_dir, f'{pack.key}{source_path.suffix}')
         else:
             target_path = Path(target_dir, source_path.name)
-        print('target:', target_path)
-        print('source', source_path)
         if target_path.exists() and not overwrite:
             raise FileExistsError(target_path)
         shutil.copy2(source_path, target_path)

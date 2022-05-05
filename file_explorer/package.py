@@ -133,14 +133,18 @@ class Package(Operations):
 
     @property
     def key(self):
-        if not all(list(self.key_info.values())):
+        if not all([value for key, value in self.key_info.items() if key != 'test']):
             return None
-        return '_'.join([self('instrument'),
-                         self('instrument_number'),
-                         self('datetime').strftime('%Y%m%d_%H%M'),
-                         self('ship'),
-                         self('cruise') or '00',
-                         self('serno')]).upper()
+        parts = [self('instrument'),
+                 self('instrument_number'),
+                 self('datetime').strftime('%Y%m%d_%H%M'),
+                 self('ship'),
+                 self('cruise') or '00',
+                 self('serno')]
+        test = self('test')
+        if type(test) == str:
+            parts.append(test)
+        return '_'.join(parts).upper()
 
     @property
     def key_info(self):
@@ -149,7 +153,8 @@ class Package(Operations):
                     datetime=self('datetime'),
                     ship=self('ship'),
                     cruise=self('cruise') or '00',
-                    serno=self('serno'))
+                    serno=self('serno'),
+                    test=self('test'))
 
     def add_file(self, file, replace=False):
         if file.name in self.file_names:

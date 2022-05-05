@@ -1,5 +1,8 @@
 from .xmlcon_file import XmlconFile
 from file_explorer.psa.datcnv import DatCnvPSAfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MismatchWarning(Exception):
@@ -9,6 +12,7 @@ class MismatchWarning(Exception):
 
 
 def get_datcnv_and_xmlcon_pars_mismatch(datcnv=None, xmlcon=None):
+    logger.info(f'Finding missmatch between:\n{datcnv}\nand\n{xmlcon}')
     dc = DatCnvPSAfile(datcnv)
     xml = XmlconFile(xmlcon)
 
@@ -34,5 +38,5 @@ def get_datcnv_and_xmlcon_pars_mismatch(datcnv=None, xmlcon=None):
                 break
     if dc_check_list:
         result['not_in_xmlcon'] = dc_check_list
-
+    logger.info('get_datcnv_and_xmlcon_pars_mismatch:', result)
     return result

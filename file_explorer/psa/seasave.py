@@ -20,12 +20,12 @@ class SeasavePSAfile(PSAfileWithPlot):
         self.cruise_tags = ['Settings', 'HeaderForm', 'Prompt{{index==3}}']
         self.lat_tags = ['Settings', 'HeaderForm', 'Prompt{{index==4}}']
         self.lon_tags = ['Settings', 'HeaderForm', 'Prompt{{index==5}}']
-        # self.pos_source_tags = ['Settings', 'HeaderForm', 'Prompt{{index==6}}']
         self.pump_tags = ['Settings', 'HeaderForm', 'Prompt{{index==6}}']
         self.id_tags = ['Settings', 'HeaderForm', 'Prompt{{index==7}}']
         self.add_samp_tags = ['Settings', 'HeaderForm', 'Prompt{{index==8}}']
         self.metadata_admin_tags = ['Settings', 'HeaderForm', 'Prompt{{index==9}}']
         self.metadata_conditions_tags = ['Settings', 'HeaderForm', 'Prompt{{index==10}}']
+        self.lims_job_tags = ['Settings', 'HeaderForm', 'Prompt{{index==11}}']
 
         self.display_depth_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
                                    'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MaximumValue']
@@ -193,4 +193,15 @@ class SeasavePSAfile(PSAfileWithPlot):
         string = utils.metadata_dict_to_string(metadata_conditions)
         element = self._get_element_from_tag_list(self.metadata_conditions_tags)
         value = f'Metadata conditions: {string}'
+        element.set('value', value)
+
+    @property
+    def lims_job(self):
+        element = self._get_element_from_tag_list(self.lims_job_tags)
+        return element.get('value')
+
+    @lims_job.setter
+    def lims_job(self, lims_job):
+        element = self._get_element_from_tag_list(self.lims_job_tags)
+        value = f'LIMS Job: {lims_job}'
         element.set('value', value)
