@@ -263,11 +263,45 @@ class OdvPackage(Package):
     def key(self):
         if not all(list(self.key_info.values())):
             return None
-        return self('stem').upper()
+        return '_'.join([self('instrument'),
+                         self('date'),
+                         self('time'),
+                         self('transect')]).upper()
 
     @property
     def key_info(self):
-        return None
+        return dict(instrument=self('instrument'),
+                    date=self('date'),
+                    time=self('time'),
+                    transect=self('transect'))
+
+
+class PrsPackage(Package):
+    INSTRUMENT_TYPE = 'prs'
+    RAW_FILES_EXTENSIONS = []
+
+    def _set_config_suffix(self, file):
+        pass
+
+    @property
+    def key(self):
+        if not all([value for value in self.key_info.values()]):
+            return None
+        parts = [self('datetime').strftime('%Y%m%d_%H%M'),
+                 self('ship'),
+                 self('cruise') or '00',
+                 self('serno')]
+        test = self('test')
+        if type(test) == str:
+            parts.append(test)
+        return '_'.join(parts).upper()
+
+    @property
+    def key_info(self):
+        return dict(datetime=self('datetime'),
+                    ship=self('ship'),
+                    cruise=self('cruise') or '00',
+                    serno=self('serno'))
 
 
 

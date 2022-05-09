@@ -1,7 +1,7 @@
+import logging
 import os
 import shutil
 from pathlib import Path
-import logging
 
 from file_explorer import utils
 from file_explorer.file import InstrumentFile
@@ -10,25 +10,27 @@ from file_explorer.odv import odv_file
 from file_explorer.package import MvpPackage
 from file_explorer.package import OdvPackage
 from file_explorer.package import Package
+from file_explorer.package import PrsPackage
 from file_explorer.package_collection import PackageCollection
 from file_explorer.seabird import BlFile
 from file_explorer.seabird import BtlFile
 from file_explorer.seabird import CnvFile
 from file_explorer.seabird import ConFile
+from file_explorer.seabird import DatFile
+from file_explorer.seabird import DeliverynoteFile
 from file_explorer.seabird import HdrFile
 from file_explorer.seabird import HexFile
 from file_explorer.seabird import JpgFile
-from file_explorer.seabird import RosFile
-from file_explorer.seabird import TxtFile
-from file_explorer.seabird import XmlconFile
-from file_explorer.seabird import mvp_files
-from file_explorer.seabird import DatFile
-from file_explorer.seabird import XmlFile
-from file_explorer.seabird import ZipFile
-from file_explorer.seabird import SensorinfoFile
 from file_explorer.seabird import MetadataFile
-from file_explorer.seabird import DeliverynoteFile
+from file_explorer.seabird import RosFile
+from file_explorer.seabird import SensorinfoFile
+from file_explorer.seabird import TxtFile
+from file_explorer.seabird import XmlFile
+from file_explorer.seabird import XmlconFile
+from file_explorer.seabird import ZipFile
+from file_explorer.seabird import mvp_files
 
+from file_explorer.other import prs_file
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,9 @@ FILES = {
     },
     'odv': {
         odv_file.OdvFile.suffix: odv_file.OdvFile
+    },
+    'prs': {
+        prs_file.PrsFile.suffix: prs_file.PrsFile
     }
 }
 
@@ -79,7 +84,8 @@ logger.debug(f'instrument_types are: {", ".join(list(FILES))}')
 PACKAGES = {
     Package.INSTRUMENT_TYPE: Package,
     MvpPackage.INSTRUMENT_TYPE: MvpPackage,
-    OdvPackage.INSTRUMENT_TYPE: OdvPackage
+    OdvPackage.INSTRUMENT_TYPE: OdvPackage,
+    PrsPackage.INSTRUMENT_TYPE: PrsPackage
 }
 
 
@@ -141,6 +147,8 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         if not file or not utils.is_matching(file, **kwargs):
             continue
         PACK = PACKAGES.get(instrument_type)
+        logger.debug(f'instrument_type: {instrument_type}')
+        logger.debug(f'PACK: {PACK}')
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
         pack.add_file(file)
