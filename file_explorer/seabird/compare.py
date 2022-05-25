@@ -38,5 +38,5 @@ def get_datcnv_and_xmlcon_pars_mismatch(datcnv=None, xmlcon=None):
                 break
     if dc_check_list:
         result['not_in_xmlcon'] = dc_check_list
-    logger.info('get_datcnv_and_xmlcon_pars_mismatch:', result)
+    logger.info(f'get_datcnv_and_xmlcon_pars_mismatch: {result}')
     return result

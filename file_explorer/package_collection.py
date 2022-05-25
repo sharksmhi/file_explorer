@@ -1,3 +1,5 @@
+import pathlib
+
 from file_explorer import utils
 from file_explorer.package import Package
 
@@ -78,6 +80,32 @@ class PackageCollection:
         if as_collection:
             return PackageCollection(f'subselection_{self.name}', matching_packages)
         return matching_packages
+
+    def get_attributes_from_all_packages(self):
+        all_list = []
+        for pack in self.packages:
+            all_list.append(pack.attributes.copy())
+        return all_list
+
+    def write_attributes_from_all_packages(self, directory):
+        all_list = self.get_attributes_from_all_packages()
+        header = set()
+        for item in all_list:
+            header.update(list(item.keys()))
+        header = sorted(header)
+        lines = []
+        lines.append('\t'.join(header))
+        for item in all_list:
+            line = []
+            for col in header:
+                value = str(item.get(col))
+                line.append(value)
+            lines.append('\t'.join(line))
+
+        path = pathlib.Path(directory, f'attributes_{self.name}.txt')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'w') as fid:
+            fid.write('\n'.join(lines))
 
     def get_data(self, zpar=None, par=None, IN_zpar=None, IN_par=None, **kwargs):
         import pandas as pd

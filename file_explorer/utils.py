@@ -1,4 +1,7 @@
 
+SHIP_TO_INTERNAL = {'77SE': '77_10'}
+
+
 def in_bbox(obj, lat_min=None, lat_max=None, lon_min=None, lon_max=None, **kwargs):
     if not any([lat_min, lat_max, lon_min, lon_max]):
         return True
@@ -63,3 +66,8 @@ def is_matching(obj, **kwargs):
         elif item != value:
             return False
     return True
+
+
+def get_internal_ship_code(code):
+    c = code.upper()
+    return SHIP_TO_INTERNAL.get(c, c)

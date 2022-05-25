@@ -89,7 +89,7 @@ PACKAGES = {
 }
 
 
-def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suffix=''):
+def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suffix='', **kwargs):
     """ Returns a list with all file paths in the given directory. Including all sub directories. """
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
@@ -139,7 +139,7 @@ def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
         return False
 
 
-def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, as_list=False, **kwargs):
+def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, as_list=False, with_new_key=False, **kwargs):
     logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
@@ -149,7 +149,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         PACK = PACKAGES.get(instrument_type)
         logger.debug(f'instrument_type: {instrument_type}')
         logger.debug(f'PACK: {PACK}')
-        pack = packages.setdefault(file.pattern, PACK(attributes=attributes))
+        pack = packages.setdefault(file.pattern, PACK(attributes=attributes, **kwargs))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
         pack.add_file(file)
     logger.info('Setting key in packages')
@@ -157,13 +157,15 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         pack.set_key()
     if as_list:
         packages = list(packages.values())
+    elif with_new_key:
+        packages = dict((item.key, item) for item in packages.values())
     return packages
 
 
-def get_packages_in_directory(directory, as_list=False, exclude_directory=None, **kwargs):
+def get_packages_in_directory(directory, as_list=False, with_new_key=False, exclude_directory=None, **kwargs):
     logger.debug('get_packages_in_directory')
     all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-    packages = get_packages_from_file_list(all_paths, as_list=as_list, **kwargs)
+    packages = get_packages_from_file_list(all_paths, as_list=as_list, with_new_key=with_new_key, **kwargs)
     return packages
 
 
@@ -218,12 +220,12 @@ def add_path_to_package(path, pack, replace=False):
     pack.add_file(file_obj, replace=replace)
 
 
-def update_package_with_files_in_directory(package, directory, exclude_directory=None, replace=False):
+def update_package_with_files_in_directory(package, directory, exclude_directory=None, replace=False, **kwargs):
     logger.debug('update_package_with_files_in_directory')
     # all_files = Path(directory).glob('**/*')
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
     for path in all_files:
-        file = get_file_object_for_path(path)
+        file = get_file_object_for_path(path, **kwargs)
         if not file:
             continue
         file.package_instrument_type = package.INSTRUMENT_TYPE
@@ -268,12 +270,12 @@ def copy_file_object(file_object, directory=None, overwrite=False):
     return get_file_object_for_path(target_path)
 
 
-def rename_package(package, overwrite=False):
+def rename_package(package, overwrite=False, **kwargs):
     logger.debug('rename_package')
     if not isinstance(package, Package):
         raise Exception('Given package is not a Package class')
     package.set_key()
-    new_package = Package()
+    new_package = Package(**kwargs)
     for file in package.files:
         new_package.add_file(rename_file_object(file, overwrite=overwrite))
     return new_package

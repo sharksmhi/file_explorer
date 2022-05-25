@@ -207,6 +207,7 @@ class InstrumentFile(ABC):
             raise FileExistsError(target_path)
         with open(target_path, 'w') as fid:
             fid.write('\n'.join(self.lines))
+        return target_path
 
 
 class UnrecognizedFile(Exception):

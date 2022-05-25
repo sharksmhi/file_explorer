@@ -7,6 +7,11 @@ from file_explorer.seabird import xmlcon_parser
 
 from file_explorer.seabird import utils
 
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 class CnvFile(InstrumentFile):
     suffix = '.cnv'
@@ -84,6 +89,7 @@ class CnvFile(InstrumentFile):
                 if line.startswith('# </Sensors>'):
                     is_xml = False
                     self._xml_tree = xmlcon_parser.get_parser_from_string(''.join(xml_lines))
+                    logger.debug(self.path)
                     self._sensor_info = xmlcon_parser.get_sensor_info(self._xml_tree)
 
     @property

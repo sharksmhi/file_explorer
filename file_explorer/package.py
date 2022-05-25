@@ -1,6 +1,10 @@
 import datetime
 
 from file_explorer import utils
+import logging
+
+import pathlib
+logger = logging.getLogger(__name__)
 
 
 class InvalidClassToCompare(Exception):
@@ -53,8 +57,9 @@ class Package(Operations):
     INSTRUMENT_TYPE = 'sbe'
     RAW_FILES_EXTENSIONS = ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.xml']
 
-    def __init__(self, attributes=None):
+    def __init__(self, attributes=None, old_key=False, **kwargs):
         self._files = []
+        self._old_key = old_key
         self._config_file_suffix = None
         attributes = attributes or {}
         self._attributes = dict((key, value.lower()) for key, value in attributes.items())
@@ -135,12 +140,22 @@ class Package(Operations):
     def key(self):
         if not all([value for key, value in self.key_info.items() if key != 'test']):
             return None
-        parts = [self('instrument'),
-                 self('instrument_number'),
-                 self('datetime').strftime('%Y%m%d_%H%M'),
-                 self('ship'),
-                 self('cruise') or '00',
-                 self('serno')]
+        if self._old_key:
+            logger.warning(f'Using old file name structure')
+            logger.debug(f"ship: {self('ship')}: {utils.get_internal_ship_code(self('ship'))}")
+            logger.debug(str(self.key_info))
+            parts = [self('instrument'),
+                     self('instrument_number'),
+                     self('datetime').strftime('%Y%m%d_%H%M'),
+                     utils.get_internal_ship_code(self('ship')),
+                     self('serno')]
+        else:
+            parts = [self('instrument'),
+                     self('instrument_number'),
+                     self('datetime').strftime('%Y%m%d_%H%M'),
+                     self('ship'),
+                     self('cruise') or '00',
+                     self('serno')]
         test = self('test')
         if type(test) == str:
             parts.append(test)
@@ -148,6 +163,14 @@ class Package(Operations):
 
     @property
     def key_info(self):
+        if self._old_key:
+            return dict(instrument=self('instrument'),
+                        instrument_number=self('instrument_number'),
+                        datetime=self('datetime'),
+                        ship=self('ship'),
+                        serno=self('serno'),
+                        test=self('test'))
+
         return dict(instrument=self('instrument'),
                     instrument_number=self('instrument_number'),
                     datetime=self('datetime'),
@@ -189,9 +212,10 @@ class Package(Operations):
     def get_file(self, **kwargs):
         matching_files = self.get_files(**kwargs)
         if not matching_files:
+            logger.error(self.key)
             raise Exception(f'No matching files for keyword arguments {kwargs}')
         if len(matching_files) > 1:
-            raise Exception(f'To many matching files for keyword arguments {kwargs}')
+            raise Exception(f'To many matching files for keyword arguments {kwargs}: {matching_files}')
         return matching_files[0]
 
     def get_file_path(self, **kwargs):
@@ -206,6 +230,43 @@ class Package(Operations):
 
     def get_plot_files(self):
         return [file for file in self._files if file.suffix == '.jpg']
+
+    def get_attributes_from_all_files(self):
+        all_list = []
+        for file in self.files:
+            all_list.append(file.attributes.copy())
+        return all_list
+
+    def write_attributes_from_all_files(self, directory, transpose=False):
+        all_list = self.get_attributes_from_all_files()
+        header = set()
+        for item in all_list:
+            header.update(list(item.keys()))
+        header = sorted(header)
+
+        if transpose:
+            lines = []
+            for col in header:
+                line = [col]
+                for item in all_list:
+                    value = str(item.get(col))
+                    line.append(value)
+                lines.append('\t'.join(line))
+        else:
+            lines = []
+            lines.append('\t'.join(header))
+            for item in all_list:
+                line = []
+                for col in header:
+                    value = str(item.get(col))
+                    line.append(value)
+                lines.append('\t'.join(line))
+
+        path = pathlib.Path(directory, f'attributes_{self.key}.txt')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'w') as fid:
+            fid.write('\n'.join(lines))
+
 
     def validate(self):
         """
