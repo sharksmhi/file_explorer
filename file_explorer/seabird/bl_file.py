@@ -22,3 +22,4 @@ class BlFile(InstrumentFile):
 
     def _save_attributes(self):
         self._attributes['nr_bottles'] = self.number_of_bottles
+        self._attributes['number_of_bottles'] = self.number_of_bottles
