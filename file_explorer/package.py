@@ -137,6 +137,19 @@ class Package(Operations):
         return attributes
 
     @property
+    def id(self):
+        parts = [self('instrument'),
+                 self('instrument_number'),
+                 # self('datetime').strftime('%Y%m%d_%H%M'),
+                 self('ship'),
+                 # self('cruise') or '00',
+                 self('serno')]
+        test = self('test')
+        if type(test) == str:
+            parts.append(test)
+        return '_'.join(parts).upper()
+
+    @property
     def key(self):
         if not all([value for key, value in self.key_info.items() if key != 'test']):
             return None

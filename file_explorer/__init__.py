@@ -139,7 +139,7 @@ def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
         return False
 
 
-def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, as_list=False, with_new_key=False, **kwargs):
+def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=None, as_list=False, with_new_key=False, with_id_as_key=False, **kwargs):
     logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
@@ -159,13 +159,15 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         packages = list(packages.values())
     elif with_new_key:
         packages = dict((item.key, item) for item in packages.values())
+    elif with_id_as_key:
+        packages = dict((item.id, item) for item in packages.values())
     return packages
 
 
-def get_packages_in_directory(directory, as_list=False, with_new_key=False, exclude_directory=None, **kwargs):
+def get_packages_in_directory(directory, as_list=False, with_new_key=False, with_id_as_key=False, exclude_directory=None, **kwargs):
     logger.debug('get_packages_in_directory')
     all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-    packages = get_packages_from_file_list(all_paths, as_list=as_list, with_new_key=with_new_key, **kwargs)
+    packages = get_packages_from_file_list(all_paths, as_list=as_list, with_new_key=with_new_key, with_id_as_key=with_id_as_key, **kwargs)
     return packages
 
 
