@@ -97,9 +97,12 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suf
     logger.debug(f'directory is set to: {suffix}')
     logger.debug(f'stem is set to: {suffix}')
     logger.debug(f'suffix is set to: {suffix}')
+    match_string = kwargs.get('match_string')
     all_files = []
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in files:
+            if match_string and match_string not in name:
+                continue
             path = Path(root, name)
             if suffix and path.suffix.lower() != suffix.lower():
                 continue
@@ -144,7 +147,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     packages = {}
     for path in file_list:
         file = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
-        if not file or not utils.is_matching(file, **kwargs):
+        if not file:  # or not utils.is_matching(file, **kwargs): This check is made in get_file_object_for_path
             continue
         PACK = PACKAGES.get(instrument_type)
         logger.debug(f'instrument_type: {instrument_type}')
@@ -166,29 +169,29 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
 
 def get_packages_in_directory(directory, as_list=False, with_new_key=False, with_id_as_key=False, exclude_directory=None, **kwargs):
     logger.debug('get_packages_in_directory')
-    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory, **kwargs)
     packages = get_packages_from_file_list(all_paths, as_list=as_list, with_new_key=with_new_key, with_id_as_key=with_id_as_key, **kwargs)
     return packages
 
 
 def get_package_for_file(path, directory=None, exclude_directory=None, only_this_file=False, **kwargs):
-    logger.debug('get_package_for_file')
+    logger.info(f'get_package_for_file: {path}')
     if isinstance(path, InstrumentFile):
         path = path.path
     elif isinstance(path, Package):
         path = path.files[0].path
     path = Path(path)
+    pack = get_packages_from_file_list([path], as_list=True, **kwargs)[0]
     if only_this_file:
-        packages = get_packages_from_file_list([path], as_list=True, **kwargs)
-        return packages[0]
-    else:
-        if not directory:
-            directory = path.parent
-        logger.info(f'Looking for files in directory: {directory}')
-        all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-        selected_paths = [p for p in all_paths if path.stem.lower() in p.stem.lower()]
-        packages = get_packages_from_file_list(selected_paths, as_list=True, **kwargs)
-        return packages[0]
+        return pack
+
+    if not directory:
+        directory = path.parent
+    logger.info(f'Looking for files in directory: {directory}')
+    all_paths = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+    selected_paths = [p for p in all_paths if path.stem.lower() in p.stem.lower()]
+    packages = get_packages_from_file_list(selected_paths, as_list=True, **kwargs)
+    return packages[0]
 
 
 def get_package_for_key(key, directory=None, exclude_directory=None, **kwargs):

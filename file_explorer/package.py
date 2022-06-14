@@ -129,11 +129,11 @@ class Package(Operations):
         attributes['nr_files'] = len(self.files)
         if self.files:
             attributes['pattern'] = self.files[0].pattern
-        for file_obj in self._files:
-            for key, value in file_obj.attributes.items():
-                if not value:
-                    continue
-                attributes[key] = value
+            for file_obj in self.files:
+                for key, value in file_obj.attributes.items():
+                    if not value:
+                        continue
+                    attributes[key] = value
         return attributes
 
     @property

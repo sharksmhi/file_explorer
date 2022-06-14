@@ -23,6 +23,7 @@ class InstrumentFile(ABC):
         self._key = None
         self._path_info = {}
         self._attributes = {}
+        self._no_datetime_from_file_name = kwargs.pop('no_datetime_from_file_name', False)
 
         encoding_key = f'{self.suffix[1:]}_encoding'
         self.encoding = kwargs.get(encoding_key) or self.encoding
@@ -142,6 +143,8 @@ class InstrumentFile(ABC):
             raise UnrecognizedFile(f'File {self.path} does not math any registered file patterns')
 
     def _get_datetime_from_path(self):
+        if self._no_datetime_from_file_name:
+            return
         if all([self._path_info.get(key) for key in ['year', 'day', 'month', 'hour', 'minute', 'second']]):
             return datetime.datetime(int(self._path_info['year']),
                                      int(self._path_info['month']),
