@@ -48,7 +48,7 @@ class SeasavePSAfile(PSAfileWithPlot):
 
     @xmlcon_path.setter
     def xmlcon_path(self, file_path):
-        file_path = file_path.strip('.xmlcon') + '.xmlcon'
+        # file_path = file_path.strip('.xmlcon') + '.xmlcon'
         element = self._get_element_from_tag_list(self.xmlcon_name_tags)
         element.set('value', str(file_path))
 
