@@ -2,6 +2,7 @@ import datetime
 
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
+from file_explorer.seabird import utils
 
 
 class HdrFile(InstrumentFile):
@@ -31,12 +32,16 @@ class HdrFile(InstrumentFile):
                     self._station = line.split(':')[-1].strip()
                 elif line.startswith('** Cruise'):
                     self._cruise_info = get_cruise_match_dict(line.split(':')[-1].strip())
-                if line.startswith('**'):
-                    if line.count(':') == 1:
-                        key, value = [part.strip() for part in line.strip().strip('*').split(':')]
-                        self._header_form[key] = value
-                    else:
-                        self._header_form['info'].append(strip_line)
+                elif line.startswith('**'):
+                    # Header form
+                    attrs = utils.get_dict_from_header_form_line(line)
+                    self._header_form.update(attrs)
+
+                    # if line.count(':') == 1:
+                    #     key, value = [part.strip() for part in line.strip().strip('*').split(':')]
+                    #     self._header_form[key] = value
+                    # else:
+                    #     self._header_form['info'].append(strip_line)
 
     def _save_attributes(self):
         self._attributes.update(dict((key.lower(), value) for key, value in self._header_form.items()))

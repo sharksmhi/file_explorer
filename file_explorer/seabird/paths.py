@@ -100,41 +100,25 @@ class SBEPaths:
         return path
 
     def set_config_root_directory(self, path):
-        self._paths['config_dir'] = Path(path)
+        self._paths['config_dir'] = Path(path).absolute()
         self._paths['instrumentinfo_file'] = Path(self._paths['config_dir'], 'Instruments.xlsx')
 
     def set_source_directory(self, path):
-        path = Path(path)
+        path = Path(path).absolute()
         if not path.is_dir():
             raise NotADirectoryError(path)
         self._paths['local_dir_source'] = Path(path)
 
-    def old_set_local_root_directory(self, directory):
-        root_directory = Path(directory)
-        if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'standard_format', 'plots']:
-            root_directory = root_directory.parent
-        self._paths['local_dir_root'] = root_directory
-        self._paths['working_dir'] = Path(self._paths['local_dir_root'], 'temp')
-        self._paths['local_dir_temp'] = self._paths['working_dir']
-        self._paths['local_dir_source'] = Path(self._paths['local_dir_root'], 'source')
-        self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], 'raw')
-        self._paths['local_dir_cnv'] = Path(self._paths['local_dir_root'], 'cnv')
-        self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], 'cnv', 'up_cast')
-        self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], 'standard_format')
-        self._paths['local_dir_plot'] = Path(self._paths['local_dir_root'], 'plots')
-
-        self._clean_temp_folder()
-
     def set_local_root_directory(self, directory):
-        root_directory = Path(directory)
+        root_directory = Path(directory).absolute()
         if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'standard_format', 'plots']:
-            root_directory = root_directory.parent
+            root_directory = root_directory.parent.parent
         self._paths['local_dir_root'] = root_directory
         self.set_year()
         self._clean_temp_folder()
 
     def set_server_root_directory(self, directory):
-        root_directory = Path(directory)
+        root_directory = Path(directory).absolute()
         if root_directory.name in ['raw', 'cnv', 'standard_format']:
             root_directory = root_directory.parent
         self._paths['server_dir_root'] = root_directory

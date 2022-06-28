@@ -1,5 +1,8 @@
 
-SHIP_TO_INTERNAL = {'77SE': '77_10'}
+SHIP_TO_INTERNAL = {
+    '77SE': '77_10',
+    '77AR': '77_14'
+}
 
 
 def in_bbox(obj, lat_min=None, lat_max=None, lon_min=None, lon_max=None, **kwargs):

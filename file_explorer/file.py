@@ -58,6 +58,9 @@ class InstrumentFile(ABC):
         # Overwrite this in subclasses
         pass
 
+    def validate(self, case_sensitive=True):
+        return {}
+
     def __str__(self):
         return str(self.path)
 
@@ -116,10 +119,18 @@ class InstrumentFile(ABC):
     @property
     def pattern(self):
         pat = self.name_match.string.split('.')[0]
-        if self._path_info.get('prefix'):
-            pat = pat.lstrip(self._path_info.get('prefix'))
-        if self._path_info.get('tail'):
-            pat = pat.rstrip(self._path_info.get('tail'))
+        prefix = self._path_info.get('prefix')
+        tail = self._path_info.get('tail')
+        if prefix and pat.startswith(prefix):
+            pat = pat[len(prefix):]
+        if tail and pat.endswith(tail):
+            pat = pat[:-len(tail)]
+
+
+        # if self._path_info.get('prefix'):
+        #     pat = pat.lstrip(self._path_info.get('prefix'))
+        # if self._path_info.get('tail'):
+        #     pat = pat.rstrip(self._path_info.get('tail'))
         return pat.upper()
 
     @property
@@ -142,8 +153,8 @@ class InstrumentFile(ABC):
         elif not self.ignore_pattern:
             raise UnrecognizedFile(f'File {self.path} does not math any registered file patterns')
 
-    def _get_datetime_from_path(self):
-        if self._no_datetime_from_file_name:
+    def _get_datetime_from_path(self, force=False):
+        if self._no_datetime_from_file_name and not force:
             return
         if all([self._path_info.get(key) for key in ['year', 'day', 'month', 'hour', 'minute', 'second']]):
             return datetime.datetime(int(self._path_info['year']),
@@ -215,3 +226,4 @@ class InstrumentFile(ABC):
 
 class UnrecognizedFile(Exception):
     pass
+

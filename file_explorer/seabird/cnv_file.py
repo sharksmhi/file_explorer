@@ -37,6 +37,14 @@ class CnvFile(InstrumentFile):
             return f'{self.key}{self.suffix}'
         return self.get_proper_name()
 
+    def validate(self, case_sensitive=True):
+        data = {}
+        file_name_datetime = self._get_datetime_from_path(force=True)
+        if file_name_datetime != self._header_datetime:
+            data['datetime mismatch in cnv'] = f'{file_name_datetime} in file name. ' \
+                                                f'{self._header_datetime} in file header'
+        return data
+
     def _get_datetime(self):
         return self._header_datetime or self._get_datetime_from_path()
 
@@ -78,7 +86,7 @@ class CnvFile(InstrumentFile):
                     self._header_cruise_info = get_cruise_match_dict(line.split(':')[-1].strip())
 
                 # Header form
-                if line.startswith('**'):
+                elif line.startswith('**'):
                     attrs = utils.get_dict_from_header_form_line(line)
                     self._header_form.update(attrs)
                 # XML

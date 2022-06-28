@@ -55,7 +55,8 @@ class Package(Operations):
     Class to hold several seabird files with the same filename structure.
     """
     INSTRUMENT_TYPE = 'sbe'
-    RAW_FILES_EXTENSIONS = ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.xml']
+    RAW_FILE_SUFFIXES = ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.xml']
+    PLOT_FILE_SUFFIXES = ['.jpg']
 
     def __init__(self, attributes=None, old_key=False, **kwargs):
         self._files = []
@@ -107,6 +108,10 @@ class Package(Operations):
     @property
     def file_names(self):
         return [file.name for file in self.files]
+
+    @property
+    def nr_of_files(self):
+        return len(self.files)
 
     @property
     def data(self):
@@ -239,10 +244,10 @@ class Package(Operations):
         return [file.path for file in self.files]
 
     def get_raw_files(self):
-        return [file for file in self._files if file.suffix in self.RAW_FILES_EXTENSIONS]
+        return [file for file in self._files if file.suffix in self.RAW_FILE_SUFFIXES]
 
     def get_plot_files(self):
-        return [file for file in self._files if file.suffix == '.jpg']
+        return [file for file in self._files if file.suffix in self.PLOT_FILE_SUFFIXES]
 
     def get_attributes_from_all_files(self):
         all_list = []
@@ -280,31 +285,38 @@ class Package(Operations):
         with open(path, 'w') as fid:
             fid.write('\n'.join(lines))
 
-
-    def validate(self):
+    def validate(self, case_sensitive=True):
         """
         Validates the package. Making cross checks etc.
         :return:
         """
-        skip_keys = ['tail', 'prefix', 'suffix', 'sensor_info']
+        skip_keys = ['tail', 'prefix', 'suffix', 'sensor_info', 'path', 'name', 'info', 'header_form']
         mismatch = {}
         attributes = {}
         for file in self._files:
+            mismatch.update(file.validate(case_sensitive=case_sensitive))
             for key, value in file.attributes.items():
                 if key in skip_keys:
                     continue
+                if value is None:
+                    continue
                 if key not in attributes:
                     attributes[key] = (str(file), value)
-                else:
-                    if attributes[key][1] != value:
-                        mismatch.setdefault(key, [attributes[key]])
-                        mismatch[key].append((str(file), value))
+                    continue
+                if attributes[key][1] != value:
+                    if not case_sensitive and \
+                        type(attributes[key][1]) == str and \
+                        type(value) == str and \
+                        attributes[key][1].lower() == value.lower():
+                        continue
+                    mismatch.setdefault(key, [attributes[key]])
+                    mismatch[key].append((str(file), value))
         return mismatch
 
 
 class MvpPackage(Package):
     INSTRUMENT_TYPE = 'mvp'
-    RAW_FILES_EXTENSIONS = ['.eng', '.log', '.m1', '.raw', '.asc', '.asvp', '.calc', '.em1', '.rnn', '.s10', '.s12', '.s52']
+    RAW_FILE_SUFFIXES = ['.eng', '.log', '.m1', '.raw', '.asc', '.asvp', '.calc', '.em1', '.rnn', '.s10', '.s12', '.s52']
 
     def _set_config_suffix(self, file):
         pass
@@ -328,7 +340,7 @@ class MvpPackage(Package):
 
 class OdvPackage(Package):
     INSTRUMENT_TYPE = 'odv'
-    RAW_FILES_EXTENSIONS = []
+    RAW_FILE_SUFFIXES = []
 
     def _set_config_suffix(self, file):
         pass
@@ -352,7 +364,7 @@ class OdvPackage(Package):
 
 class PrsPackage(Package):
     INSTRUMENT_TYPE = 'prs'
-    RAW_FILES_EXTENSIONS = []
+    RAW_FILE_SUFFIXES = []
 
     def _set_config_suffix(self, file):
         pass

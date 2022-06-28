@@ -89,7 +89,7 @@ PACKAGES = {
 }
 
 
-def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suffix='', **kwargs):
+def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, exclude_suffix=None, exclude_string=None, suffix='', **kwargs):
     """ Returns a list with all file paths in the given directory. Including all sub directories. """
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
@@ -110,8 +110,14 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, suf
                 continue
             all_files.append(path)
     if exclude_directory:
-        logger.debug(f'exclude_directory is set to: {suffix}')
+        logger.debug(f'exclude_directory is set to: {exclude_directory}')
         all_files = [path for path in all_files if exclude_directory not in path.parts]
+    if exclude_suffix:
+        logger.debug(f'exclude_suffix is set to: {exclude_suffix}')
+        all_files = [path for path in all_files if path.suffix != exclude_suffix]
+    if exclude_string:
+        logger.debug(f'exclude_string is set to: {exclude_string}')
+        all_files = [path for path in all_files if exclude_string not in str(path)]
     return all_files
 
 
@@ -165,6 +171,14 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     elif with_id_as_key:
         packages = dict((item.id, item) for item in packages.values())
     return packages
+
+
+# pat = self.name_match.string.split('.')[0]
+# if self._path_info.get('prefix'):
+#     pat = pat.lstrip(self._path_info.get('prefix'))
+# if self._path_info.get('tail'):
+#     pat = pat.rstrip(self._path_info.get('tail'))
+# return pat.upper()
 
 
 def get_packages_in_directory(directory, as_list=False, with_new_key=False, with_id_as_key=False, exclude_directory=None, **kwargs):
