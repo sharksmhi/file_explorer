@@ -160,7 +160,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         logger.debug(f'PACK: {PACK}')
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes, **kwargs))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
-        pack.add_file(file)
+        pack.add_file(file, **kwargs)
     logger.info('Setting key in packages')
     for pack in packages.values():
         pack.set_key()
@@ -308,7 +308,7 @@ def copy_package_to_directory(pack, directory, overwrite=False, rename=False, ex
     """
     logger.debug('copy_package_files_to_directory')
     if not isinstance(pack, Package):
-        raise Exception('Given package is not a Package class')
+        raise Exception(f'Given package is not of type Package: {type(pack)}')
     target_dir = Path(directory)
     target_dir.mkdir(parents=True, exist_ok=True)
     paths = pack.get_file_paths()

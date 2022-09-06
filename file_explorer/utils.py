@@ -74,3 +74,7 @@ def is_matching(obj, **kwargs):
 def get_internal_ship_code(code):
     c = code.upper()
     return SHIP_TO_INTERNAL.get(c, c)
+
+
+def get_pos_from_comment_line(string):
+    pass

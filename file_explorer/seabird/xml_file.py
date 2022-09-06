@@ -9,7 +9,7 @@ class XmlFile(InstrumentFile):
     _sensor_info = None
 
     def _save_info_from_file(self):
-        self._tree = xmlcon_parser.get_parser_from_file(self.path)
+        self._tree = xmlcon_parser.get_parser_from_file(self.path, encoding='cp1252')
         self._sensor_info = xmlcon_parser.get_sensor_info(self._tree)
 
     def _save_attributes(self):

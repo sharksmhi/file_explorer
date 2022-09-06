@@ -1,3 +1,4 @@
+import re
 
 
 def get_dict_from_header_form_line(line):
@@ -20,3 +21,18 @@ def get_dict_from_header_form_line(line):
         k, v = [part.strip() for part in item.split(':')]
         result[k] = v
     return result
+
+
+def get_nmea_pos_from_header_form_line(line):
+    string = line.lower()
+    lat_match = re.findall('lat[:. 0-9]+', string)
+    lon_match = re.findall('long[:. 0-9]+', string)
+    if not (lat_match and lon_match):
+        return
+    lat_decmin = lat_match[0].split(' ', 1)[-1]
+    lon_decmin = lon_match[0].split(' ', 1)[-1]
+    if len(lon_decmin.split('.')[0].replace(' ','')) == 4:
+        lon_decmin = f'0{lon_decmin}'
+    return lat_decmin, lon_decmin
+
+

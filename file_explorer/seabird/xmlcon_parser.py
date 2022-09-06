@@ -8,8 +8,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_parser_from_file(path):
-    return ET.parse(path)
+def get_parser_from_file(path, encoding=None):
+    if encoding:
+        with open(path, encoding=encoding) as fid:
+            return ET.fromstring(fid.read())
+    else:
+        return ET.parse(path)
 
 
 def get_parser_from_string(string):

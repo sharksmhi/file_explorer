@@ -2,10 +2,14 @@ import datetime
 import hashlib
 from abc import ABC, abstractmethod
 from pathlib import Path
+import logging
+import xml
 
 from file_explorer import mapping
 from file_explorer import utils
 from file_explorer.patterns import get_file_name_match
+
+logger = logging.getLogger(__name__)
 
 
 class InstrumentFile(ABC):
@@ -28,17 +32,25 @@ class InstrumentFile(ABC):
         encoding_key = f'{self.suffix[1:]}_encoding'
         self.encoding = kwargs.get(encoding_key) or self.encoding
 
-        self._load_file()
-        self._fixup()
-        self._save_info_from_file()
+        self.edit_mode = kwargs.get('edit_mode', False)
 
-        self._attributes.update(self._path_info)
-        self._attributes['suffix'] = self.suffix
-        self._attributes['path'] = str(self.path)
-        self._attributes['name'] = self.name
-        # self._attributes['cruise'] = '00'
-        self._save_attributes()
-        self._add_and_map_attributes()
+        try:
+            self._load_file()
+            self._fixup()
+            self._save_info_from_file()
+
+            self._attributes.update(self._path_info)
+            self._attributes['suffix'] = self.suffix
+            self._attributes['path'] = str(self.path)
+            self._attributes['name'] = self.name
+            # self._attributes['cruise'] = '00'
+            self._save_attributes()
+            self._add_and_map_attributes()
+        except xml.etree.ElementTree.ParseError as e:
+            logger.error(f'Could not parse xml in file: {self.path}\n{e}')
+            print(self.path)
+            raise
+
 
     def _get_datetime(self):
         # Overwrite this in subclasses if needed

@@ -197,8 +197,8 @@ class Package(Operations):
                     serno=self('serno'),
                     test=self('test'))
 
-    def add_file(self, file, replace=False):
-        if file.name in self.file_names:
+    def add_file(self, file, replace=False, add_duplicates=False, **kwargs):
+        if file.name in self.file_names and not add_duplicates:
             return False
         elif self._files and file.pattern != self._files[0].pattern:
             return False
@@ -231,7 +231,7 @@ class Package(Operations):
         matching_files = self.get_files(**kwargs)
         if not matching_files:
             logger.error(self.key)
-            raise Exception(f'No matching files for keyword arguments {kwargs}')
+            raise FileNotFoundError(f'No matching files for keyword arguments {kwargs}')
         if len(matching_files) > 1:
             raise Exception(f'To many matching files for keyword arguments {kwargs}: {matching_files}')
         return matching_files[0]

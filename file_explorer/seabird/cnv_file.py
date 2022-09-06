@@ -1,5 +1,6 @@
 import datetime
 
+import pathlib
 from file_explorer import mapping
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
@@ -66,6 +67,8 @@ class CnvFile(InstrumentFile):
         self._nr_data_lines = 0
         self._parameters = {}
         self._header_cruise_info = {}
+        self._psa_info = {}
+        self._psa_header_keys = ['datcvn', 'filter', 'celltm', 'loopedit', 'derive', 'split']
 
         xml_lines = ['<?xml version="1.0" encoding="UTF-8"?>\n']
         is_xml = False
@@ -89,6 +92,10 @@ class CnvFile(InstrumentFile):
                 elif line.startswith('**'):
                     attrs = utils.get_dict_from_header_form_line(line)
                     self._header_form.update(attrs)
+
+                # psa info
+                self._add_psa_info(line)
+
                 # XML
                 if line.startswith('# <Sensors count'):
                     is_xml = True
@@ -100,13 +107,33 @@ class CnvFile(InstrumentFile):
                     logger.debug(self.path)
                     self._sensor_info = xmlcon_parser.get_sensor_info(self._xml_tree)
 
+    def _add_psa_info(self, line):
+        if not line.startswith('#'):
+            return
+        line = line.strip('# ')
+        split_line = [item.strip() for item in line.split('=', 1)]
+        split_line[0] = split_line[0].lower()
+        if not split_line[0].split('_')[0] in self._psa_header_keys:
+            return
+        if 'date' in split_line[0]:
+            return
+        if 'time' in split_line[0]:
+            return
+        if split_line[0].endswith('_in'):
+            return
+        self._psa_info[split_line[0]] = split_line[1]
+
+    @property
+    def psa_info(self):
+        return self._psa_info
+
     @property
     def data(self):
         import pandas as pd
         from io import StringIO
         metadata = True
         header = []
-        with open(self.path, encoding='cp1252') as fid:
+        with open(self.path, encoding=self.encoding) as fid:
             data = []
             for line in fid:
                 if not line.strip():
@@ -123,5 +150,44 @@ class CnvFile(InstrumentFile):
                     data.append('\t'.join(line.split()))
         df = pd.read_csv(StringIO('\n'.join(data)), sep='\t', encoding='cp1252')
         return df
+
+    def set_nmea_pos(self, directory=None, subdir=None, overwrite=False):
+        if not self.edit_mode:
+            raise Exception(f'{__class__} object is not in edit_mode: {self.path}')
+        path = self.path
+        if directory:
+            path = pathlib.Path(directory, path.name)
+        if subdir:
+            path = pathlib.Path(path.parent, subdir, path.name)
+        if path.exists() and not overwrite:
+            raise FileExistsError(path)
+        lat_str = '* NMEA Latitude:'
+        lon_str = '* NMEA Longitude:'
+        pos = None
+        lines = []
+        lat_index = None
+        lon_index = None
+        with open(self.path) as fid:
+            for i, line in enumerate(fid):
+                lines.append(line)
+                if not lat_index and line.startswith(lat_str):
+                    lat_index = i
+                if not lon_index and line.startswith(lon_str):
+                    lon_index = i
+                if not pos:
+                    pos = utils.get_nmea_pos_from_header_form_line(line)
+        if not pos:
+            return False
+        lines[lat_index] = f'{lat_str} {pos[0]}\n'
+        lines[lon_index] = f'{lon_str} {pos[1]}\n'
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'w', encoding=self.encoding) as fid:
+            fid.write(''.join(lines))
+        return path
+
+
+
+
 
 
