@@ -11,7 +11,6 @@ from file_explorer.seabird import utils
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -45,7 +44,7 @@ class CnvFile(InstrumentFile):
         file_name_datetime = self._get_datetime_from_path(force=True)
         if file_name_datetime != self._header_datetime:
             data['datetime mismatch in cnv'] = f'{file_name_datetime} in file name. ' \
-                                                f'{self._header_datetime} in file header'
+                                               f'{self._header_datetime} in file header'
         return data
 
     def _get_datetime(self):
@@ -80,7 +79,8 @@ class CnvFile(InstrumentFile):
 
                 # General header info
                 if line.startswith('* System UTC'):
-                    self._header_datetime = datetime.datetime.strptime(line.split('=')[1].strip(), self.header_date_format)
+                    self._header_datetime = datetime.datetime.strptime(line.split('=')[1].strip(),
+                                                                       self.header_date_format)
                 elif line.startswith('* NMEA Latitude') and '=' in line:
                     self._header_lat = line.split('=')[1].strip()[:-1].replace(' ', '')
                 elif line.startswith('* NMEA Longitude') and '=' in line:
@@ -193,7 +193,3 @@ def get_data_object(path, encoding='cp1252'):
                 data.append('\t'.join(line.split()))
     df = pd.read_csv(StringIO('\n'.join(data)), sep='\t', encoding='cp1252')
     return file_data.Data(df)
-
-
-
-

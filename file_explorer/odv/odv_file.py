@@ -32,7 +32,7 @@ class OdvFile(InstrumentFile):
                     continue
                 elif strip_line.startswith('Cruise'):
                     header = strip_line.split('\t')
-                    metadata_max_index = len(header) - len(self._parameters)*2
+                    metadata_max_index = len(header) - len(self._parameters) * 2
                     for par, item in zip(self._parameters, header[metadata_max_index::2]):
                         par['name'] = item
                 elif not line.startswith('\t'):
@@ -76,7 +76,7 @@ def get_data_object(path, metadata=None):
             full_header = split_line
             header = [item for item in split_line if item != 'QV:SEADATANET']
             data_list.append('\t'.join(header))
-            metadata = lines[r+1].split('\t')[:nr_metadata]
+            metadata = lines[r + 1].split('\t')[:nr_metadata]
         else:
             data = []
             for fullh, lined in zip(full_header[nr_metadata:], split_line[nr_metadata:]):

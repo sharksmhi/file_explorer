@@ -4,6 +4,7 @@ from file_explorer import utils
 import logging
 
 import pathlib
+
 logger = logging.getLogger(__name__)
 
 
@@ -305,9 +306,9 @@ class Package(Operations):
                     continue
                 if attributes[key][1] != value:
                     if not case_sensitive and \
-                        type(attributes[key][1]) == str and \
-                        type(value) == str and \
-                        attributes[key][1].lower() == value.lower():
+                            type(attributes[key][1]) == str and \
+                            type(value) == str and \
+                            attributes[key][1].lower() == value.lower():
                         continue
                     mismatch.setdefault(key, [attributes[key]])
                     mismatch[key].append((str(file), value))
@@ -316,7 +317,8 @@ class Package(Operations):
 
 class MvpPackage(Package):
     INSTRUMENT_TYPE = 'mvp'
-    RAW_FILE_SUFFIXES = ['.eng', '.log', '.m1', '.raw', '.asc', '.asvp', '.calc', '.em1', '.rnn', '.s10', '.s12', '.s52']
+    RAW_FILE_SUFFIXES = ['.eng', '.log', '.m1', '.raw', '.asc', '.asvp', '.calc', '.em1', '.rnn', '.s10', '.s12',
+                         '.s52']
 
     def _set_config_suffix(self, file):
         pass
@@ -388,6 +390,3 @@ class PrsPackage(Package):
                     ship=self('ship'),
                     cruise=self('cruise') or '00',
                     serno=self('serno'))
-
-
-

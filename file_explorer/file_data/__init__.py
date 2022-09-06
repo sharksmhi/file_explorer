@@ -19,7 +19,7 @@ class Data:
         return self._df
 
     @property
-    def parameters(self) -> list[str]:
+    def parameters(self) -> list:
         return list(self.df)
 
     def __call__(self, *args, **kwargs) -> pd.DataFrame:
