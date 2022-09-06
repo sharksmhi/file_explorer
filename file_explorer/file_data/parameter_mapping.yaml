@@ -1,0 +1,106 @@
+ALTM_CTD:
+  - ALTM_CTD [m]
+  - Altimeter [m]
+
+CHLFLUO_CTD:
+  - CHLFLUO_CTD [mg/m3]
+  - Chl-a Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]
+
+CNDC2_CTD:
+  - CNDC2_CTD [S/m]
+  - Conductivity, 2 [S/m]
+
+CNDC_CTD:
+  - CNDC_CTD [S/m]
+  - Conductivity [S/m]
+
+DENS2_CTD:
+  - DENS2_CTD [kg/m3]
+  - Density, 2 [density, kg/m^3]
+
+DENS_CTD:
+  - DENS_CTD [kg/m3]
+  - Density [density, kg/m^3]
+
+DEPH:
+  - DEPH [m]
+  - Depth [true depth, m], lat = 58.6412
+
+DESC_RATE_CTD:
+  - DESC_RATE_CTD [m/s]
+  - Descent Rate [m/s]
+
+DOXY2_CTD:
+  - DOXY2_CTD [ml/l]
+  - Oxygen, SBE 43, 2 [ml/l], WS = 2
+
+DOXY_CTD:
+  - DOXY_CTD [ml/l]
+  - Oxygen, SBE 43 [ml/l], WS = 2
+
+DOXY_SAT2_CTD:
+  - DOXY_SAT2_CTD [%]
+  - Oxygen, SBE 43, 2 [% saturation], WS = 2
+
+DOXY_SAT_CTD:
+  - DOXY_SAT_CTD [%]
+  - Oxygen, SBE 43 [% saturation], WS = 2
+
+PAR_CTD:
+  - PAR_CTD [µE/(cm2 sec)]
+  - PAR/Irradiance, Biospherical/Licor [µE/(cm^2*s)]
+
+PHYC_CTD:
+  - PHYC_CTD [ppb]
+  - Phycocyanin Fluorescence, WET Labs ECO-AFL/FL, 2 [mg/m^3]
+
+PRES_CTD:
+  - PRES_CTD [dbar]
+  - Pressure, Digiquartz [db]
+
+PUMP_CTD:
+  - PUMP_CTD []
+
+SALT2_CTD:
+  - SALT2_CTD [psu]
+  - Salinity, Practical, 2 [PSU]
+
+SALT_CTD:
+  - SALT_CTD [psu]
+  - Salinity, Practical [PSU]
+
+SALT_DIFF_CTD:
+  - SALT_DIFF_CTD [psu]
+  - Salinity, Practical, Difference, 2 - 1 [PSU]
+
+SIGMAT2_CTD:
+  - SIGMAT2_CTD [kg/m3]
+  - Density, 2 [sigma-t, kg/m^3 ]
+
+SIGMAT_CTD:
+  - SIGMAT_CTD [kg/m3]
+  - Density [sigma-t, kg/m^3 ]
+
+SVEL2_CTD:
+  - SVEL2_CTD [m/s]
+  - Sound Velocity, 2 [Chen-Millero, m/s]
+
+SVEL_CTD:
+  - SVEL_CTD [m/s]
+  - Sound Velocity [Chen-Millero, m/s]
+
+TEMP2_CTD:
+  - TEMP2_CTD [°C (ITS-90)]
+  - Temperature, 2 [ITS-90, deg C]
+
+TEMP_CTD:
+  - TEMP_CTD [°C (ITS-90)]
+  - Temperature [ITS-90, deg C]
+
+TEMP_DIFF_CTD:
+  - TEMP_DIFF_CTD [°C (ITS-90)]
+  - Temperature Difference, 2 - 1 [ITS-90, deg C]
+
+TURB_CTD:
+  - TURB_CTD [NTU]
+  - Turbidity, WET Labs ECO [NTU]

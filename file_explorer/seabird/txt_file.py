@@ -3,6 +3,7 @@ import datetime
 
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
+from file_explorer import file_data
 
 
 class TxtFile(InstrumentFile):
@@ -10,6 +11,7 @@ class TxtFile(InstrumentFile):
     date_format = '%b %d %Y %H:%M:%S'
     _datetime = None
     _station = None
+    _data = None
     _metadata = None
     _header_form = None
     _lat = None
@@ -80,13 +82,19 @@ class TxtFile(InstrumentFile):
 
     @property
     def data(self):
-        import pandas as pd
-        from io import StringIO
-        with open(self.path, encoding='cp1252') as fid:
-            data = ''
-            for line in fid:
-                if line.startswith('//'):
-                    continue
-                data = data + line
-        df = pd.read_csv(StringIO(data), sep='\t', encoding='cp1252')
-        return df
+        if self._data is None:
+            self._data = get_data_object(self.path)
+        return self._data
+
+
+def get_data_object(path):
+    import pandas as pd
+    from io import StringIO
+    with open(path, encoding='cp1252') as fid:
+        data = ''
+        for line in fid:
+            if line.startswith('//'):
+                continue
+            data = data + line
+    df = pd.read_csv(StringIO(data), sep='\t', encoding='cp1252')
+    return file_data.Data(df)
