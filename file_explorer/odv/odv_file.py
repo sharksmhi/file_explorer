@@ -4,7 +4,7 @@ from file_explorer.file import InstrumentFile
 from file_explorer import file_data
 
 
-class OdvFile(InstrumentFile):
+class OdvFile(InstrumentFile, file_data.DataFile):
     suffix = '.txt'
 
     def _save_info_from_file(self):
@@ -54,35 +54,28 @@ class OdvFile(InstrumentFile):
         else:
             return datetime.datetime.strptime(value, '%Y-%m-%dt%H:%M:%S')
 
-    @property
-    def data(self):
-        if self._data is None:
-            self._data = get_data_object(self.path, metadata=self._metadata)
-        return self._data
-
-
-def get_data_object(path, metadata=None):
-    import pandas as pd
-    from io import StringIO
-    nr_metadata = len(metadata)
-    with open(path) as fid:
-        lines = [line.rstrip() for line in fid if line.strip() and '//' not in line]
-    full_header = []
-    data_list = []
-    metadata = []
-    for r, line in enumerate(lines):
-        split_line = line.split('\t')
-        if line.startswith('Cruise'):
-            full_header = split_line
-            header = [item for item in split_line if item != 'QV:SEADATANET']
-            data_list.append('\t'.join(header))
-            metadata = lines[r + 1].split('\t')[:nr_metadata]
-        else:
-            data = []
-            for fullh, lined in zip(full_header[nr_metadata:], split_line[nr_metadata:]):
-                if fullh == 'QV:SEADATANET':
-                    continue
-                data.append(lined)
-            data_list.append('\t'.join(metadata + data))
-    df = pd.read_csv(StringIO('\n'.join(data_list)), sep='\t', encoding='cp1252')
-    return file_data.Data(df)
+    def _get_data_object(self):
+        import pandas as pd
+        from io import StringIO
+        nr_metadata = len(self._metadata)
+        with open(self.path) as fid:
+            lines = [line.rstrip() for line in fid if line.strip() and '//' not in line]
+        full_header = []
+        data_list = []
+        metadata = []
+        for r, line in enumerate(lines):
+            split_line = line.split('\t')
+            if line.startswith('Cruise'):
+                full_header = split_line
+                header = [item for item in split_line if item != 'QV:SEADATANET']
+                data_list.append('\t'.join(header))
+                metadata = lines[r + 1].split('\t')[:nr_metadata]
+            else:
+                data = []
+                for fullh, lined in zip(full_header[nr_metadata:], split_line[nr_metadata:]):
+                    if fullh == 'QV:SEADATANET':
+                        continue
+                    data.append(lined)
+                data_list.append('\t'.join(metadata + data))
+        df = pd.read_csv(StringIO('\n'.join(data_list)), sep='\t', encoding='cp1252')
+        return file_data.Data(df)

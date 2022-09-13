@@ -125,7 +125,7 @@ class Package(Operations):
             if not utils.is_matching(file_obj, **kwargs):
                 continue
             elif file_obj.data is not None:
-                return file_obj.data
+                return file_obj.get_data(**kwargs)
 
     @property
     def attributes(self):

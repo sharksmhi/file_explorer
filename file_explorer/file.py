@@ -17,7 +17,6 @@ class InstrumentFile(ABC):
     _path_info = {}
     _attributes = {}
     _lines = None
-    data = None
     package_instrument_type = None
     encoding = 'cp1252'
 
@@ -50,7 +49,6 @@ class InstrumentFile(ABC):
             logger.error(f'Could not parse xml in file: {self.path}\n{e}')
             print(self.path)
             raise
-
 
     def _get_datetime(self):
         # Overwrite this in subclasses if needed

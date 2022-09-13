@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class CnvFile(InstrumentFile):
+class CnvFile(InstrumentFile, file_data.DataFile):
     suffix = '.cnv'
     header_date_format = '%b %d %Y %H:%M:%S'
     header = None
@@ -29,7 +29,6 @@ class CnvFile(InstrumentFile):
     _parameters = {}
     _sensor_info = None
     _nr_data_lines = None
-    _data = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -129,12 +128,6 @@ class CnvFile(InstrumentFile):
     def psa_info(self):
         return self._psa_info
 
-    @property
-    def data(self):
-        if self._data is None:
-            self._data = get_data_object(self.path, encoding=self.encoding)
-        return self._data
-
     def set_nmea_pos(self, directory=None, subdir=None, overwrite=False):
         if not self.edit_mode:
             raise Exception(f'{__class__} object is not in edit_mode: {self.path}')
@@ -170,26 +163,25 @@ class CnvFile(InstrumentFile):
             fid.write(''.join(lines))
         return path
 
-
-def get_data_object(path, encoding='cp1252'):
-    import pandas as pd
-    from io import StringIO
-    metadata = True
-    header = []
-    with open(path, encoding=encoding) as fid:
-        data = []
-        for line in fid:
-            if not line.strip():
-                continue
-            if line.strip() == '*END*':
-                metadata = False
-                data.append('\t'.join(header))
-            elif line.startswith('# name'):
-                par = line.split(':', 1)[-1].strip()
-                header.append(par)
-            elif metadata:
-                continue
-            else:
-                data.append('\t'.join(line.split()))
-    df = pd.read_csv(StringIO('\n'.join(data)), sep='\t', encoding='cp1252')
-    return file_data.Data(df)
+    def _get_data_object(self):
+        import pandas as pd
+        from io import StringIO
+        metadata = True
+        header = []
+        with open(self.path, encoding=self.encoding) as fid:
+            data = []
+            for line in fid:
+                if not line.strip():
+                    continue
+                if line.strip() == '*END*':
+                    metadata = False
+                    data.append('\t'.join(header))
+                elif line.startswith('# name'):
+                    par = line.split(':', 1)[-1].strip()
+                    header.append(par)
+                elif metadata:
+                    continue
+                else:
+                    data.append('\t'.join(line.split()))
+        df = pd.read_csv(StringIO('\n'.join(data)), sep='\t', encoding='cp1252')
+        return file_data.Data(df)
