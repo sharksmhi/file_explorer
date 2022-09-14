@@ -229,4 +229,4 @@ class PackageCollection:
         matching = self.get_packages_matching(**kwargs)
         if not matching:
             return False
-        return matching
+        return True
