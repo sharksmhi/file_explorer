@@ -83,6 +83,7 @@ class Package(Operations):
         pref_attributes = {}
         suffix = kwargs.get('pref_suffix')
         if suffix and suffix in self.suffix_list:
+            logger.info(f'Looking for {keys=} with pre_suffix={suffix}')
             pref_attributes = self.get_file(suffix=suffix).attributes
         if len(keys) == 1:
             key = keys[0].lower()
