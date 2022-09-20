@@ -66,6 +66,9 @@ class Package(Operations):
         attributes = attributes or {}
         self._attributes = dict((key, value.lower()) for key, value in attributes.items())
 
+    def __repr__(self):
+        return f'´Package ({self.INSTRUMENT_TYPE}): {self.key}'
+
     def __str__(self):
         if not self._files:
             return f'Empty {self.INSTRUMENT_TYPE} Package'
