@@ -81,8 +81,9 @@ class Package(Operations):
         if not utils.is_matching(self, **kwargs):
             return
         pref_attributes = {}
-        if kwargs.get('pref_suffix'):
-            pref_attributes = self.get_file(suffix=kwargs.get('pref_suffix')).attributes
+        suffix = kwargs.get('pref_suffix')
+        if suffix and suffix in self.suffix_list:
+            pref_attributes = self.get_file(suffix=suffix).attributes
         if len(keys) == 1:
             key = keys[0].lower()
             return pref_attributes.get(key, self.attributes.get(key, False))
@@ -115,6 +116,10 @@ class Package(Operations):
     @property
     def file_names(self):
         return [file.name for file in self.files]
+
+    @property
+    def suffix_list(self):
+        return sorted(set([file.suffix for file in self.files]))
 
     @property
     def nr_of_files(self):
