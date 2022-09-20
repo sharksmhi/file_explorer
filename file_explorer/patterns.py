@@ -12,7 +12,7 @@ FILE_NAME_PATTERNS = [
                                                         r'(?P<minute>\d{2})',
                                                         r'(?P<ship>\d{2}_\w{2})',
                                                         r'(?P<serno>\d{4})',
-                                                        r'(?P<tail>[a-z0-9\-_åäö]*)?',
+                                                        r'(?P<tail>[a-z0-9\-_åäö ]*)?',
                                                         r'(?P<suffix>\w*)?'
                                                         )
                    ),
@@ -30,7 +30,7 @@ FILE_NAME_PATTERNS = [
                                                            r'(?P<serno>\d{4})',
                                                            r'(?P<test>test)',
                                                            r'(?P<tail>['
-                                                           r'a-z0-9\-_åäö]*)?',
+                                                           r'a-z0-9\-_åäö ]*)?',
                                                            r'(?P<suffix>\w*)?'
                                                            )
                    ),
@@ -47,7 +47,7 @@ FILE_NAME_PATTERNS = [
                                                            r'(?P<cruise>\d{2})',
                                                            r'(?P<serno>\d{4})',
                                                            r'(?P<tail>['
-                                                           r'a-z0-9\-_åäö]*)?',
+                                                           r'a-z0-9\-_åäö ]*)?',
                                                            r'(?P<suffix>\w*)?'
                                                            )
                    ),
@@ -56,7 +56,7 @@ FILE_NAME_PATTERNS = [
                                        r'(?P<year>\d{2})',
                                        r'(?P<midfix>u|d)',
                                        r'(?P<serno>\d{3,4})',
-                                       r'(?P<tail>[a-z0-9\-_åäö]*)?',
+                                       r'(?P<tail>[a-z0-9\-_åäö ]*)?',
                                        r'(?P<suffix>\w*)?'
                                        )
                    ),
@@ -78,7 +78,7 @@ FILE_NAME_PATTERNS = [
                                                      r'(?P<hour>\d{2})',
                                                      r'(?P<minute>\d{2})',
                                                      r'(?P<second>\d{2})',
-                                                     r'(?P<transect>[a-z0-9\-_åäö]*)',
+                                                     r'(?P<transect>[a-z0-9\-_åäö ]*)',
                                                      r'(?P<suffix>cnv)?'
                                                     )
                     ),
@@ -90,7 +90,7 @@ FILE_NAME_PATTERNS = [
                                                     r'(?P<hour>\d{2})',
                                                     r'(?P<minute>\d{2})',
                                                     r'(?P<second>\d{2})',
-                                                    r'(?P<tail>[a-z0-9\-_åäö]*)?',
+                                                    r'(?P<tail>[a-z0-9\-_åäö ]*)?',
                                                     r'(?P<suffix>\w*)?'
                                                     )
                    ),
