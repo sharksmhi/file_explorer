@@ -21,6 +21,7 @@ from file_explorer.seabird import DeliverynoteFile
 from file_explorer.seabird import HdrFile
 from file_explorer.seabird import HexFile
 from file_explorer.seabird import JpgFile
+from file_explorer.seabird import PngFile
 from file_explorer.seabird import MetadataFile
 from file_explorer.seabird import RosFile
 from file_explorer.seabird import SensorinfoFile
@@ -45,6 +46,7 @@ FILES = {
         HexFile.suffix: HexFile,
         RosFile.suffix: RosFile,
         JpgFile.suffix: JpgFile,
+        PngFile.suffix: PngFile,
 
         ConFile.suffix: ConFile,
         DatFile.suffix: DatFile,

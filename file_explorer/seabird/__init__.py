@@ -7,6 +7,7 @@ from .dat_file import DatFile
 from .hdr_file import HdrFile
 from .hex_file import HexFile
 from .jpg_file import JpgFile
+from .png_file import PngFile
 from .ros_file import RosFile
 from .txt_file import TxtFile
 from .xmlcon_file import XmlconFile

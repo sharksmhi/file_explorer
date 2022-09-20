@@ -161,7 +161,8 @@ class InstrumentFile(ABC):
             self.name_match = name_match
             self._path_info.update(name_match.groupdict())
         elif not self.ignore_pattern:
-            raise UnrecognizedFile(f'File {self.path} does not math any registered file patterns')
+            raise UnrecognizedFile(f'File {self.path} does not match any '
+                                   f'registered file patterns')
 
     def _get_datetime_from_path(self, force=False):
         if self._no_datetime_from_file_name and not force:
