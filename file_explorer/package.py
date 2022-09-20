@@ -80,10 +80,13 @@ class Package(Operations):
     def __call__(self, *keys, **kwargs):
         if not utils.is_matching(self, **kwargs):
             return
-        else:
-            if len(keys) == 1:
-                return self.attributes.get(keys[0].lower(), False)
-            return tuple([self.attributes.get(key.lower(), False) for key in keys])
+        pref_attributes = {}
+        if kwargs.get('pref_suffix'):
+            pref_attributes = self.get_file(suffix=kwargs.get('pref_suffix')).attributes
+        if len(keys) == 1:
+            key = keys[0].lower()
+            return pref_attributes.get(key, self.attributes.get(key, False))
+        return tuple([pref_attributes.get(key.lower(), self.attributes.get(key.lower(), False)) for key in keys])
 
     def __getitem__(self, item):
         return self.path(item)

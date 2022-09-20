@@ -3,7 +3,6 @@ import file_explorer
 from file_explorer.tests.test_data import TEST_DATA_DIR
 from file_explorer.tests.test_data import CNV_TEST_FILE
 from file_explorer.tests.test_data import LOCAL_TEST_DIR
-import pathlib
 
 
 def test_package_nr_packs():
