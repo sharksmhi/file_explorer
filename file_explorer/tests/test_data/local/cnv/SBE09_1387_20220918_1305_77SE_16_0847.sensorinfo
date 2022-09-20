@@ -1,0 +1,29 @@
+INSTRUMENT_ID	INSTRUMENT_PROD	INSTRUMENT_MOD	INSTRUMENT_SERIE	PARAM_REPORTED	PARAM_SIMPLE	PARAM	MUNIT	CALCULATED	CALCULATE_REF	SENSOR_PROD	SENSOR_MOD	SENSOR_ID	CALIB_DATE	LMQNT	RANA	UNCERT	FREQ	MET_COMNT	MET_COMNT.1	TIME
+SBE091387	Seabird	911plus	1387	t090C: Temperature [ITS-90, deg C]	Temperatur	TEMP_CTD	°C (ITS-90)	No		Seabird	SBE 3plus	5351	2020-03-24	-5.0	-5.0 - +35 °C	± 0.001 °C	24			2022-09-18
+SBE091387	Seabird	911plus	1387	c0S/m: Conductivity [S/m]	Konduktivitet	CNDC_CTD	S/m	No		Seabird	SBE 4C	3941	2020-01-23	0	0.0-7.0 S/m	± 0.0003 S/m	24			2022-09-18
+SBE091387	Seabird	911plus	1387	prDM: Pressure, Digiquartz [db]	Tryck	PRES_CTD	dbar	No		Paroscientific	Digiquartz 8000-series	1387	2019-05-31	0	0-1400 m	0.01% Typical Accuracy	24			2022-09-18
+SBE091387	Seabird	911plus	1387	t190C: Temperature, 2 [ITS-90, deg C]	Temperatur2	TEMP2_CTD	°C (ITS-90)	No		Seabird	SBE 3plus	5355	2020-03-24	-5.0	-5.0 - +35 °C	± 0.001 °C	24			2022-09-18
+SBE091387	Seabird	911plus	1387	c1S/m: Conductivity, 2 [S/m]	Konduktivitet2	CNDC2_CTD	S/m	No		Seabird	SBE 4C	3943	2020-01-23	0	0.0-7.0 S/m	± 0.0003 S/m	24			2022-09-18
+SBE091387	Seabird	911plus	1387	sbeox0ML/L: Oxygen, SBE 43 [ml/l], WS = 2	Syrgashalt	DOXY_CTD	ml/l	No		Seabird	SBE 43	3829	2019-06-06	0.1	120% of surface saturation in all natural waters, fresh and salt		24	Based on signal 0-5VDC. *Note that a SBE43 mounted on a SBE19 has a sampling frequency of 4Hz.		2022-09-18
+SBE091387	Seabird	911plus	1387	sbeox1ML/L: Oxygen, SBE 43, 2 [ml/l], WS = 2	Syrgashalt2	DOXY2_CTD	ml/l	No		Seabird	SBE 43	2127	2019-06-14	0.1	120% of surface saturation in all natural waters, fresh and salt		24*	Based on signal 0-5VDC. *Note that a SBE43 mounted on a SBE19 has a sampling frequency of 4Hz.		2022-09-18
+SBE091387	Seabird	911plus	1387	flECO-AFL: Chl-a Fluorescence, WET Labs ECO-AFL/FL [mg/m^3]	Klorofyllfluorescens	CHLFLUO_CTD	mg/m3	No		WET Labs	ECO-FLNTU-RTD	FLNTURT-1899	2022-01-26	0	0-50 µg/I	0.025 µg/I	8			2022-09-18
+SBE091387	Seabird	911plus	1387	turbWETntu0: Turbidity, WET Labs ECO [NTU]	Turbiditet	TURB_CTD	NTU	No		WET Labs	ECO-FLNTU-RTD	FLNTURT-1899	2022-01-26	0	0-25 NTU	0.013 NTU	8			2022-09-18
+SBE091387	Seabird	911plus	1387	altM: Altimeter [m]	Altimeter	ALTM_CTD	m	No		Teledyne	PSA-916	71991	2019-08-30	1	1-100 m	2.5 cm				2022-09-18
+SBE091387	Seabird	911plus	1387	flECO-AFL1: Phycocyanin Fluorescence, WET Labs ECO-AFL/FL, 2 [mg/m^3]	Phycocyaninfluorescens	PHYC_CTD	ppb	No		WET Labs	ECO-FLPC-RTD	FLPCRTD-2299	2021-12-17	0	0-230 ppb	0.03 ppb	8			2022-09-18
+SBE091387	Seabird	911plus	1387	par: PAR/Irradiance, Biospherical/Licor [µE/(cm^2*s)]	PAR	PAR_CTD	µE/(cm2 sec)	No		Biospherical	QSP-2000	70711	2021-11-26	1.4x10e-5	1.4x10e-5 µE/(cm2 ·sec) to 0.5 µE/(cm2 ·sec)					2022-09-18
+SBE091387	Seabird	911plus	1387	scan: Scan Count	scan nummer	SCAN_CTD		No												2022-09-18
+SBE091387	Seabird	911plus	1387	pumps: Pump Status	pump status	PUMP_CTD		No		Seabird	SBE 5T									2022-09-18
+SBE091387	Seabird	911plus	1387	dz/dtM: Descent Rate [m/s]	fallhastighet	DESC_RATE_CTD	m/s	Yes	derivative of pressure with respect to time									calculated in seabird dataprocessing by using the derivative of pressure with respect to time		2022-09-18
+SBE091387	Seabird	911plus	1387	sal00: Salinity, Practical [PSU]	Salthalt	SALT_CTD	psu	Yes	UNESCO 1983 (EOS 80)					2				calculated from conductivity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	sal11: Salinity, Practical, 2 [PSU]	Salthalt2	SALT2_CTD	psu	Yes	UNESCO 1983 (EOS 80)					2				calculated from conductivity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	secS-priS: Salinity, Practical, Difference, 2 - 1 [PSU]	Salthalt diff	SALT_DIFF_CTD	psu	Yes												2022-09-18
+SBE091387	Seabird	911plus	1387	T2-T190C: Temperature Difference, 2 - 1 [ITS-90, deg C]	Temperatur diff	TEMP_DIFF_CTD	°C (ITS-90)	Yes												2022-09-18
+SBE091387	Seabird	911plus	1387	density00: Density [density, kg/m^3]	Densitet	DENS_CTD	kg/m3	Yes	UNESCO 1983 (EOS 80)									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	density11: Density, 2 [density, kg/m^3]	Densitet2	DENS2_CTD	kg/m3	Yes	UNESCO 1983 (EOS 80)									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	sigma-t00: Density [sigma-t, kg/m^3 ]	Densitet	SIGMAT_CTD	kg/m3	Yes	UNESCO 1983 (EOS 80)									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	sigma-t11: Density, 2 [sigma-t, kg/m^3 ]	Densitet2	SIGMAT2_CTD	kg/m3	Yes	UNESCO 1983 (EOS 80)									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	depFM: Depth [true depth, m], lat = 55.3827	Djup	DEPH	m	Yes	Calculated from true density profile									calculated from density and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	svCM: Sound Velocity [Chen-Millero, m/s]	Ljudhastighet	SVEL_CTD	m/s	Yes	UNESCO 1983 (EOS 80) Chen-Millero									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	svCM1: Sound Velocity, 2 [Chen-Millero, m/s]	Ljudhastighet2	SVEL2_CTD	m/s	Yes	UNESCO 1983 (EOS 80) Chen-Millero									calculated from salinity, temperature and pressure		2022-09-18
+SBE091387	Seabird	911plus	1387	sbeox0PS: Oxygen, SBE 43 [% saturation], WS = 2	Syremättnad	DOXY_SAT_CTD	%	Yes												2022-09-18
+SBE091387	Seabird	911plus	1387	sbeox1PS: Oxygen, SBE 43, 2 [% saturation], WS = 2	Syremättnad2	DOXY_SAT2_CTD	%	Yes												2022-09-18

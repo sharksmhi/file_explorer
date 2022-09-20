@@ -1,0 +1,36 @@
+* Sea-Bird SBE 9 Data File:
+* FileName = L:\nytt_ctd_format\2022\SBE09_1387_20220823_1040_77SE_14_0600.hdr
+* Software Version Seasave V 7.26.7.121
+* Temperature SN = 5351
+* Conductivity SN = 3941
+* Number of Bytes Per Scan = 41
+* Number of Voltage Words = 4
+* Number of Scans Averaged by the Deck Unit = 1
+* System UpLoad Time = Aug 23 2022 10:41:43
+* NMEA Latitude = 58 38.47 N
+* NMEA Longitude = 010 51.70 E
+* NMEA UTC (Time) = Aug 23 2022  10:41:43
+* Store Lat/Lon Data = Append to Every Scan
+* SBE 11plus V 5.2
+* number of scans to average = 1
+* pressure baud rate = 9600
+* NMEA baud rate = 4800
+* GPIB address = 1
+* advance primary conductivity  0.073 seconds
+* advance secondary conductivity  0.073 seconds
+* autorun on power up is disabled
+* S>
+** Station: 2 SSE Persgrund 
+** Operator: MHan 
+** Ship: 77SE Svea 
+** Cruise: 77SE-2022-14 
+** Latitud [GG MM.mm N]:  
+** Longitude [GG MM.mm E]:  
+** Pumps: PrimaryPump: 6060 # SecondaryPump: 6061 
+** EventIDs: EventID:  # ParentEventID:  
+** Additional Sampling:  
+** Metadata admin: MPROG: NATL # PROJ: IBT # ORDERER: SLU, HAV, SMHI # SLABO: SMHI # ALABO: SMHI # REFSK: HC-B-B8, HC-C-C2, OM7 
+** Metadata conditions: WADEP: 77 # WINDIR: 07 # WINSP: 3 # AIRTEMP: 19.0 # AIRPRES: 1024 # WEATH: 1 # CLOUD: 3 # WAVES: 2 # ICEOB: 0 # COMNT_VISIT:  
+** LIMS Job: 20227710-0600 
+* System UTC = Aug 23 2022 10:41:43
+*END*
