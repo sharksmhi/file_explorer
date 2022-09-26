@@ -149,13 +149,13 @@ class SeasavePSAfile(PSAfileWithPlot):
     def event_ids(self):
         element = self._get_element_from_tag_list(self.id_tags)
         string = element.get('value')
-        return utils.metadata_string_to_dict(string.split(':', 1)[-1].strip())
+        return utils.get_metadata_event_ids_from_string(string)
+        # return utils.metadata_string_to_dict(string.split(':', 1)[-1].strip())
 
     @event_ids.setter
     def event_ids(self, event_ids):
-        string = utils.metadata_dict_to_string(event_ids)
         element = self._get_element_from_tag_list(self.id_tags)
-        value = f'EventIDs: {string}'
+        value = utils.get_metadata_string_from_event_ids(event_ids)
         element.set('value', value)
 
     @property

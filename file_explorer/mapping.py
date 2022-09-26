@@ -19,6 +19,12 @@ SHIP = {'77se': '77SE',
         'au': '34EB'}
 
 
+INSTRUMENT_TYPE_TO_PLATFORM = {
+    'sbe': 'CTD',
+    'mvp': 'MVP'
+}
+
+
 def get_instrument_mapping(string):
     return INSTRUMENT.get(string, string)
 
@@ -35,3 +41,7 @@ def get_year_mapping(year):
         else:
             year = '19' + year
     return year
+
+
+def get_platform_mapping(instrument_type):
+    return INSTRUMENT_TYPE_TO_PLATFORM.get(instrument_type.lower())

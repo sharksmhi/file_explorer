@@ -130,7 +130,6 @@ def _get_paths_in_directory(directory):
 
 
 def get_file_object_for_path(path, instrument_type='sbe', **kwargs):
-    logger.debug('get_file_object_for_path')
     path = Path(path)
     itype = FILES.get(instrument_type)
     if not itype:
@@ -158,8 +157,6 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
         if not file:  # or not utils.is_matching(file, **kwargs): This check is made in get_file_object_for_path
             continue
         PACK = PACKAGES.get(instrument_type)
-        logger.debug(f'instrument_type: {instrument_type}')
-        logger.debug(f'PACK: {PACK}')
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes, **kwargs))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
         pack.add_file(file, **kwargs)

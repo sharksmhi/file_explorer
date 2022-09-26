@@ -1,6 +1,7 @@
 import datetime
 
 from file_explorer import utils
+from file_explorer import mapping
 import logging
 
 import pathlib
@@ -103,6 +104,10 @@ class Package(Operations):
         for f in self._files:
             if f.suffix[1:] == item or f.suffix == item:
                 return f.path
+
+    @property
+    def platform(self):
+        return mapping.get_platform_mapping(self.INSTRUMENT_TYPE)
 
     @property
     def pattern(self):

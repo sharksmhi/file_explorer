@@ -114,7 +114,6 @@ def get_hardware_data(tree):
 
 
 def get_datetime_object(date_str):
-    logger.debug(f'get_datetime_object(date_str): {date_str}')
     if not date_str:
         return ''
     if len(date_str) == 6:

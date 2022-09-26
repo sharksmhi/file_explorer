@@ -1,11 +1,13 @@
 import yaml
 from pathlib import Path
+import re
 
 MAPPING_FILE_PATH = Path(Path(__file__).parent, 'parameter_mapping.yaml')
 
 
 def strip_par(par: str) -> str:
-    return par.lower().replace(' ', '')
+    return ''.join(re.findall('[a-z0-9]', par.lower()))
+    # return par.lower().replace(' ', '')
 
 
 def get_mapping_data_from_file() -> dict:

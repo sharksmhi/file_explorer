@@ -17,6 +17,8 @@ from .sensorinfo_file import SensorinfoFile
 from .metadata_file import MetadataFile
 from .deliverynote_file import DeliverynoteFile
 
+from .edit_txt import add_event_id
+
 from .compare import MismatchWarning
 
 from .paths import SBEPaths
