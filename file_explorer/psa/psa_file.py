@@ -35,13 +35,15 @@ class PSAfile:
                         break
                 if not condition_found:
                     raise Exception('Could not find condition!')
+            elif '#' in tag:
+                tag, index = tag.split('#')
+                element = element.findall(tag)[int(index)]
             else:
                 element = element.find(tag)
         return element
 
     def _get_from_tag_list(self, tag_list, key='value'):
         element = self._get_element_from_tag_list(tag_list)
-        print(element)
         return element.get(key)
 
     def _set_from_tag_list(self, tag_list, key='value', value=None):

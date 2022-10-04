@@ -27,14 +27,23 @@ class SeasavePSAfile(PSAfileWithPlot):
         self.metadata_conditions_tags = ['Settings', 'HeaderForm', 'Prompt{{index==10}}']
         self.lims_job_tags = ['Settings', 'HeaderForm', 'Prompt{{index==11}}']
 
-        self.display_depth_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
+        self.display_depth_tags = ['Clients', 'DisplaySettings', 'Display#0', 'XYPlotData', 'Axes',
                                    'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MaximumValue']
 
-        self.display_nr_bins_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
+        self.display_nr_bins_tags = ['Clients', 'DisplaySettings', 'Display#0', 'XYPlotData', 'Axes',
                                      'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MajorDivisions']
 
-        self.display_nr_minor_bins_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
+        self.display_nr_minor_bins_tags = ['Clients', 'DisplaySettings', 'Display#0', 'XYPlotData', 'Axes',
                                            'Axis{{Calc;FullName;value==Pressure, Digiquartz [db]}}', 'MinorDivisions']
+
+        self.display_depth_tags_2 = ['Clients', 'DisplaySettings', 'Display#2', 'XYPlotData', 'Axes',
+                                   'Axis{{Calc;FullName;value==Depth [salt water, m]}}', 'MaximumValue']
+
+        self.display_nr_bins_tags_2 = ['Clients', 'DisplaySettings', 'Display#2', 'XYPlotData', 'Axes',
+                                     'Axis{{Calc;FullName;value==Depth [salt water, m]}}', 'MajorDivisions']
+
+        self.display_nr_minor_bins_tags_2 = ['Clients', 'DisplaySettings', 'Display#2', 'XYPlotData', 'Axes',
+                                           'Axis{{Calc;FullName;value==Depth [salt water, m]}}', 'MinorDivisions']
 
         self.display_parameter_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes', 'Axis']
 

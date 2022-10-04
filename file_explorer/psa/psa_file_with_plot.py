@@ -28,6 +28,7 @@ class PSAfileWithPlot(PSAfile):
     @display_depth.setter
     def display_depth(self, max_depth):
         self._set_from_tag_list(self.display_depth_tags, key='value', value=str(max_depth))
+        self._set_from_tag_list(self.display_depth_tags_2, key='value', value=str(max_depth))
 
     @property
     def nr_bins(self):
@@ -36,6 +37,7 @@ class PSAfileWithPlot(PSAfile):
     @nr_bins.setter
     def nr_bins(self, nr_bins):
         self._set_from_tag_list(self.display_nr_bins_tags, key='value', value=str(int(nr_bins)))
+        self._set_from_tag_list(self.display_nr_bins_tags_2, key='value', value=str(int(nr_bins)))
 
         bin_size = int(float(self.display_depth) / float(nr_bins))
         nr_minor_bins = '5'
@@ -44,6 +46,7 @@ class PSAfileWithPlot(PSAfile):
         elif bin_size == 10:
             nr_minor_bins = '2'
         self._set_from_tag_list(self.display_nr_minor_bins_tags, key='value', value=nr_minor_bins)
+        self._set_from_tag_list(self.display_nr_minor_bins_tags_2, key='value', value=nr_minor_bins)
 
     def get_displayed_parameters(self):
         values_from_tags = 'Calc;FullName'
