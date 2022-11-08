@@ -28,10 +28,21 @@ class TxtFile(InstrumentFile, file_data.DataFile):
         self._cruise_info = {}
         self._comment_qc = []
         self._parameters = None
+        self._lat_dd = None
+        self._lon_dd = None
 
+        header = None
         with open(self.path) as fid:
             for line in fid:
                 strip_line = line.strip()
+                if not header and not line.startswith('//'):
+                    header = [item.strip() for item in strip_line.split('\t')]
+                    continue
+                if header:
+                    data_dict = dict(zip(header, [item.strip() for item in strip_line.split('\t')]))
+                    self._lat_dd = float(data_dict['LATITUDE_DD'])
+                    self._lon_dd = float(data_dict['LONGITUDE_DD'])
+                    continue
                 if strip_line.startswith('//METADATA;'):
                     m, key, value = strip_line.split(';', 2)
                     self._metadata[key] = value
@@ -71,6 +82,8 @@ class TxtFile(InstrumentFile, file_data.DataFile):
         self._attributes.update(dict((key.lower(), value) for key, value in self._metadata.items()))
         self._attributes['lat'] = self._lat
         self._attributes['lon'] = self._lon
+        self._attributes['lat_dd'] = self._lat_dd
+        self._attributes['lon_dd'] = self._lon_dd
         self._attributes['station'] = self._station
         self._attributes['cruise_info'] = self._cruise_info
         self._attributes['header_form'] = self._header_form
