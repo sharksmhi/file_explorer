@@ -123,8 +123,9 @@ class SeasavePSAfile(PSAfileWithPlot):
     def position(self):
         lat_element = self._get_element_from_tag_list(self.lat_tags)
         lon_element = self._get_element_from_tag_list(self.lon_tags)
-        source_element = self._get_element_from_tag_list(self.pos_source_tags)
-        return [lat_element.get('value'), lon_element.get('value'), source_element.get('value')]
+        # source_element = self._get_element_from_tag_list(self.pos_source_tags)
+        # return [lat_element.get('value'), lon_element.get('value'), source_element.get('value')]
+        return [lat_element.get('value'), lon_element.get('value')]
 
     @position.setter
     def position(self, position):
@@ -137,7 +138,7 @@ class SeasavePSAfile(PSAfileWithPlot):
         elif not position[2]:
             position.append('Unknown')
 
-        lat_element.set('value', f'Latitud [GG MM.mm N]: {position[0]}')
+        lat_element.set('value', f'Latitude [GG MM.mm N]: {position[0]}')
         lon_element.set('value', f'Longitude [GG MM.mm E]: {position[1]}')
         # source_element.set('value', f'Position source: {position[2]}')
 
