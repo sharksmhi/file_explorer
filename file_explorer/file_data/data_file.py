@@ -15,6 +15,10 @@ class DataFile(ABC):
         data_obj = self.get_data_object(**kwargs)
         return data_obj()
 
+    @property
+    def data(self):
+        return self.get_data()
+
     @abstractmethod
     def _get_data_object(self, **kwargs):
         ...
