@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import shutil
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from file_explorer import utils
 from file_explorer.file import InstrumentFile
 from file_explorer.file import UnrecognizedFile
 from file_explorer.odv import odv_file
+from file_explorer.other import prs_file
 from file_explorer.package import MvpPackage
 from file_explorer.package import OdvPackage
 from file_explorer.package import Package
@@ -21,17 +23,20 @@ from file_explorer.seabird import DeliverynoteFile
 from file_explorer.seabird import HdrFile
 from file_explorer.seabird import HexFile
 from file_explorer.seabird import JpgFile
-from file_explorer.seabird import PngFile
 from file_explorer.seabird import MetadataFile
+from file_explorer.seabird import PngFile
 from file_explorer.seabird import RosFile
 from file_explorer.seabird import SensorinfoFile
 from file_explorer.seabird import TxtFile
 from file_explorer.seabird import XmlFile
 from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import ZipFile
+from file_explorer.seabird import edit_hdr
+from file_explorer.seabird import edit_hex
 from file_explorer.seabird import mvp_files
 
-from file_explorer.other import prs_file
+from file_explorer import sharkweb
+from file_explorer import lims
 
 logger = logging.getLogger(__name__)
 
@@ -170,14 +175,6 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     elif with_id_as_key:
         packages = dict((item.id, item) for item in packages.values())
     return packages
-
-
-# pat = self.name_match.string.split('.')[0]
-# if self._path_info.get('prefix'):
-#     pat = pat.lstrip(self._path_info.get('prefix'))
-# if self._path_info.get('tail'):
-#     pat = pat.rstrip(self._path_info.get('tail'))
-# return pat.upper()
 
 
 def get_packages_in_directory(directory, as_list=False, with_new_key=False, with_id_as_key=False, exclude_directory=None, **kwargs):
@@ -393,6 +390,56 @@ def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, 
             print(path)
         print('-' * 50)
         print()
+
+def edit_seabird_raw_files_in_package(pack,
+                                      output_dir,
+                                      overwrite=False,
+                                      **meta):
+    """
+    Edits metadata in hex and hrd files. Saves to new location 'output_dir'. Option to load metadata from
+    sharkweb-file or lims-file
+    """
+    for file in pack.get_raw_files():
+        if file.suffix == '.hdr':
+            edit_hdr.update_hdr_file(file, output_directory=output_dir, overwrite=overwrite, **meta)
+        elif file.suffix == '.hex':
+            edit_hex.update_hex_file(file, output_directory=output_dir, overwrite=overwrite, **meta)
+        else:
+            target_path = pathlib.Path(output_dir, file.name)
+            if target_path.exists() and not overwrite:
+                raise FileExistsError(target_path)
+            shutil.copy2(file.path, target_path)
+    return get_package_for_key(pack.key, directory=output_dir)
+
+
+def edit_seabird_raw_files_in_packages(packs,
+                                       output_dir,
+                                       sharkweb_file_path=None,
+                                       lims_file_path=None,
+                                       overwrite=False,
+                                       columns=None,
+                                       **data):
+    """
+    Edits metadata in hex and hrd files. Saves to new location 'output_dir'. Option to load metadata from
+    sharkweb-file or lims-file
+    """
+    sharkweb_meta = {}
+    lims_meta = {}
+    if sharkweb_file_path:
+        sharkweb_meta = sharkweb.get_metadata_from_sharkweb_btl_row_data(sharkweb_file_path, columns=columns)
+    if lims_file_path:
+        lims_meta = lims.get_metadata_from_lims_export_file(lims_file_path, columns=columns)
+    new_packs = []
+    for pack in packs:
+        meta = {}
+        meta.update(sharkweb_meta.get(pack.short_key, {}))
+        meta.update(lims_meta.get(pack.short_key, {}))
+        meta.update(data)
+        new_pack = edit_seabird_raw_files_in_package(pack, output_dir=output_dir, overwrite=overwrite, **meta)
+        new_packs.append(new_pack)
+    return new_packs
+
+
 
 
 

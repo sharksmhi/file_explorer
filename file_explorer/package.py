@@ -1,8 +1,11 @@
 import datetime
+import shutil
 
 from file_explorer import utils
 from file_explorer import mapping
 import logging
+from file_explorer.seabird import edit_hex
+from file_explorer.seabird import edit_hdr
 
 import pathlib
 

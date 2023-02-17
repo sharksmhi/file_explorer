@@ -110,6 +110,10 @@ class InstrumentFile(ABC):
     def key(self):
         return self._key
 
+    @property
+    def short_key(self):
+        return f'{self.year}-{self.ship}-{self.serno}'
+
     @key.setter
     def key(self, key):
         self._key = key

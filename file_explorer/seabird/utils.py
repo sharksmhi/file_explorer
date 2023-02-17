@@ -36,3 +36,46 @@ def get_nmea_pos_from_header_form_line(line):
     return lat_decmin, lon_decmin
 
 
+def metadata_string_to_dict(string):
+    key_value = [item.strip() for item in string.split('#')]
+    data = {}
+    for key_val in key_value:
+        key, value = [item.strip() for item in key_val.split(':')]
+        data[key] = value
+    return data
+
+
+def metadata_dict_to_string(data):
+    string_list = []
+    for key, value in data.items():
+        string_list.append(f'{key}: {value}')
+    string = ' # '.join(string_list)
+    return string
+
+
+# def get_metadata_string_from_event_ids(event_ids):
+#     string = metadata_dict_to_string(event_ids)
+#     return f'EventIDs: {string}'
+#
+#
+# def get_metadata_event_ids_from_string(string):
+#     return metadata_string_to_dict(string.split(':', 1)[-1].strip())
+#
+#
+def get_header_form_information(path):
+    info = {}
+    with open(path) as fid:
+        for line in fid:
+            if not line.startswith('**'):
+                continue
+            split_line = [part.strip() for part in line.strip('*').split(':', 1)]
+            if len(split_line) != 2:
+                continue
+            info[split_line[0]] = split_line[1]
+            # Special treatment for metadata
+            if 'metadata' in split_line[0].lower():
+                metadata = metadata_string_to_dict(split_line[1])
+                for key, value in metadata.items():
+                    info[key] = value
+    return info
+

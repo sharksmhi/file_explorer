@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
@@ -36,12 +37,6 @@ class HdrFile(InstrumentFile):
                     # Header form
                     attrs = utils.get_dict_from_header_form_line(line)
                     self._header_form.update(attrs)
-
-                    # if line.count(':') == 1:
-                    #     key, value = [part.strip() for part in line.strip().strip('*').split(':')]
-                    #     self._header_form[key] = value
-                    # else:
-                    #     self._header_form['info'].append(strip_line)
 
     def _save_attributes(self):
         self._attributes.update(dict((key.lower(), value) for key, value in self._header_form.items()))
