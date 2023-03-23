@@ -1,0 +1,46 @@
+config:
+  root:
+    rel_path: ''
+    suffixes: []
+
+source:
+  root:
+    rel_path: ''
+    suffixes: []
+
+local:
+  temp:
+    rel_path: 'temp'
+    suffixes: []
+  raw:
+    rel_path: '<YEAR>/raw'
+    suffixes: ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.zip']
+  cnv:
+    rel_path: '<YEAR>/cnv'
+    suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
+  upcast:
+    rel_path: '<YEAR>/cnv/up_cast'
+    suffixes: ['.cnv']
+  nsf:
+    rel_path: '<YEAR>/standard_format'
+    suffixes: ['.txt']
+  plots:
+    rel_path: '<YEAR>/plots'
+    suffixes: ['.jpg', '.png']
+
+server:
+  raw:
+    rel_path: '<YEAR>/raw'
+    suffixes: ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.zip']
+  cnv:
+    rel_path: '<YEAR>/cnv'
+    suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
+  upcast:
+    rel_path: '<YEAR>/cnv/up_cast'
+    suffixes: ['.cnv']
+  nsf:
+    rel_path: '<YEAR>/standard_format'
+    suffixes: ['.txt']
+  plots:
+    rel_path: '<YEAR>/plots'
+    suffixes: ['.jpg', '.png']

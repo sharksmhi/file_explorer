@@ -1,0 +1,3 @@
+
+class RootDirectoryNotSetError(Exception):
+    pass

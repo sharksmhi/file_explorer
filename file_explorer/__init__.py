@@ -101,8 +101,8 @@ def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, exc
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
     logger.debug('_get_paths_in_directory_tree')
-    logger.debug(f'directory is set to: {suffix}')
-    logger.debug(f'stem is set to: {suffix}')
+    logger.debug(f'directory is set to: {directory}')
+    logger.debug(f'stem is set to: {stem}')
     logger.debug(f'suffix is set to: {suffix}')
     match_string = kwargs.get('match_string')
     all_files = []
@@ -160,6 +160,7 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     for path in file_list:
         file = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
         if not file:  # or not utils.is_matching(file, **kwargs): This check is made in get_file_object_for_path
+            logger.debug(f'Could not create file object for path: {path}')
             continue
         PACK = PACKAGES.get(instrument_type)
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes, **kwargs))
@@ -239,9 +240,11 @@ def update_package_with_files_in_directory(package, directory, exclude_directory
     logger.debug('update_package_with_files_in_directory')
     # all_files = Path(directory).glob('**/*')
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
+    print(f'{all_files=}')
     for path in all_files:
         file = get_file_object_for_path(path, **kwargs)
         if not file:
+            print(f'NOT FILE: {file}')
             continue
         file.package_instrument_type = package.INSTRUMENT_TYPE
         # print('PACKAGE', package.key)

@@ -53,15 +53,17 @@ def metadata_dict_to_string(data):
     return string
 
 
-# def get_metadata_string_from_event_ids(event_ids):
-#     string = metadata_dict_to_string(event_ids)
-#     return f'EventIDs: {string}'
-#
-#
-# def get_metadata_event_ids_from_string(string):
-#     return metadata_string_to_dict(string.split(':', 1)[-1].strip())
-#
-#
+def get_metadata_string_from_event_ids(event_ids):
+    string = metadata_dict_to_string(event_ids)
+    return f'EventIDs: {string}'
+
+
+def get_metadata_event_ids_from_string(string):
+    if 'EventIDs' not in string:
+        return
+    return metadata_string_to_dict(string.split(':', 1)[-1].strip())
+
+
 def get_header_form_information(path):
     info = {}
     with open(path) as fid:

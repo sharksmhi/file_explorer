@@ -1,4 +1,5 @@
 import file_explorer
+from file_explorer.seabird import utils
 import logging
 from pathlib import Path
 
@@ -11,7 +12,6 @@ LIMS_SHIP_MAPPING = {'77SE': '7710',
 
 def add_event_id(txt, overwrite=False, **kwargs):
     """ Adds event_id and parent_event_id information to header form if not present """
-    import ctd_processing.utils
 
     event_id = kwargs.get('event_id')
     parent_event_id = kwargs.get('parent_event_id')
@@ -55,13 +55,13 @@ def add_event_id(txt, overwrite=False, **kwargs):
     with open(path) as fid:
         for line in fid:
             if 'eventid' in line.lower():
-                event_ids = ctd_processing.utils.get_metadata_event_ids_from_string(line.strip())
+                event_ids = utils.get_metadata_event_ids_from_string(line.strip())
                 event_ids['EventID'] = event_id
                 event_ids['ParentEventID'] = parent_event_id
                 line = f'//INSTRUMENT_METADATA;** ' \
-                       f'{ctd_processing.utils.get_metadata_string_from_event_ids(event_ids)}\n'
+                       f'{utils.get_metadata_string_from_event_ids(event_ids)}\n'
                 header_form_lines.append(line)
-            elif line.startswith('**'):
+            elif line.startswith('//INSTRUMENT_METADATA;**'):
                 header_form_lines.append(line)
             elif header_form_lines:
                 lines_after_header_form.append(line)

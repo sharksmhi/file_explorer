@@ -223,7 +223,6 @@ class Package(Operations):
             return False
         elif self._files and file.pattern != self._files[0].pattern:
             return False
-
         if replace:
             for file in self._files:
                 if file.get_proper_name() == file.get_proper_name():
