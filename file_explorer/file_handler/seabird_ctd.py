@@ -56,6 +56,7 @@ class SBEFileHandler(FileHandler):
         super().__init__(*args, **kwargs)
         # self.paths = paths_object
         self._all_files_by_stem = {}
+        self._all_files_by_cruise = {}
         # self._all_local_files_by_directory = {}
         # self._all_server_files_by_directory = {}
         # self.local_files = {}
@@ -82,12 +83,14 @@ class SBEFileHandler(FileHandler):
     def _reset_files(self, root_key):
         super()._reset_files(root_key)
         self._all_files_by_stem[root_key] = {}
+        self._all_files_by_cruise[root_key] = {}
 
     def _store_files_in_dir(self, root_key, sub_key):
         self._check_sub_key(root_key, sub_key)
         self._files.setdefault(root_key, {})
         self._files[root_key].setdefault(sub_key, {})
         self._all_files_by_stem.setdefault(root_key, {})
+        self._all_files_by_cruise.setdefault(root_key, {})
         for path in self.get_dir(root_key, sub_key).iterdir():
             if path.is_dir():
                 continue
@@ -97,7 +100,12 @@ class SBEFileHandler(FileHandler):
             obj = File(path)
             self._all_files_by_stem[root_key].setdefault(obj.stripped_stem, {})
             self._all_files_by_stem[root_key][obj.stripped_stem][(sub_key, obj.name)] = obj
-            pass
+            self._all_files_by_cruise[root_key].setdefault(obj.cruise, {})
+            self._all_files_by_cruise[root_key][obj.cruise][(sub_key, obj.name)] = obj
+
+    def get_all_files_by_cruise(self, root_key, cruise):
+        self._check_root_key(root_key)
+        return self._all_files_by_cruise[root_key]
 
     def _add_file_to_dir(self, root_key, path):
         if not super()._add_file_to_dir(root_key, path):
@@ -112,8 +120,8 @@ class SBEFileHandler(FileHandler):
             return
         sub_key = self._get_sub_key_for_path(root_key, path.parent)
         obj = File(path)
-        print(f'{root_key=}')
-        print(f'{self._all_files_by_stem[root_key]=}')
+        # print(f'{root_key=}')
+        # print(f'{self._all_files_by_stem[root_key]=}')
         self._all_files_by_stem[root_key][obj.stripped_stem].pop((sub_key, obj.name), None)
 
     def _clean_temp_folder(self):
@@ -336,6 +344,13 @@ class File:
     @property
     def suffix(self):
         return self.path.suffix
+
+    @property
+    def cruise(self):
+        try:
+            return self.name.split('_')[-2]
+        except IndexError:
+            return None
 
 
 def copy_package_to_local(pack, fhandler: FileHandler, overwrite=False, rename=False):

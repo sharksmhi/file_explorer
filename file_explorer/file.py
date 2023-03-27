@@ -36,6 +36,23 @@ class InstrumentFile(ABC):
         try:
             self._load_file()
             self._fixup()
+            if kwargs.get('load_file', True):
+                self.save_info_from_file()
+            else:
+                self._attributes.update(self._path_info)
+                self._attributes['suffix'] = self.suffix
+                self._attributes['path'] = str(self.path)
+                self._attributes['name'] = self.name
+                # self._attributes['cruise'] = '00'
+                self._save_attributes()
+                self._add_and_map_attributes()
+        except xml.etree.ElementTree.ParseError as e:
+            logger.error(f'Could not parse xml in file: {self.path}\n{e}')
+            print(self.path)
+            raise
+
+    def save_info_from_file(self):
+        try:
             self._save_info_from_file()
 
             self._attributes.update(self._path_info)
