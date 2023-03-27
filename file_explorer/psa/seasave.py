@@ -1,7 +1,7 @@
 import pathlib
 
 # from ctd_processing import utils
-from file_explorer import utils
+from file_explorer.seabird import utils
 from .psa_file_with_plot import PSAfileWithPlot
 
 
