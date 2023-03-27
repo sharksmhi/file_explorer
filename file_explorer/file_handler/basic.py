@@ -79,7 +79,9 @@ class FileHandler:
     def _check_root_dir(self, root_key):
         self._check_root_key(root_key)
         if root_key not in self._root_dirs:
-            raise RootDirectoryNotSetError(f'Root directory is not set for root _key: {root_key}')
+            msg = f'Root directory is not set for root _key: {root_key}'
+            logger.warning(msg)
+            raise RootDirectoryNotSetError(msg)
         root_dir = self._root_dirs[root_key]
         if not root_dir.exists():
             raise Exception(f'Root directory does not exist: {root_dir}')
