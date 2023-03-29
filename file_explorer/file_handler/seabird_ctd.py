@@ -10,6 +10,7 @@ from ctd_processing import exceptions
 
 import file_explorer
 from file_explorer.file_handler import FileHandler
+from file_explorer import get_file_object_for_path
 
 import logging
 
@@ -97,32 +98,42 @@ class SBEFileHandler(FileHandler):
             if not self._is_valid_suffix(root_key, sub_key, path.suffix):
                 continue
             self._files[root_key][sub_key][path.name] = path
-            obj = File(path)
-            self._all_files_by_stem[root_key].setdefault(obj.stripped_stem, {})
-            self._all_files_by_stem[root_key][obj.stripped_stem][(sub_key, obj.name)] = obj
+            # obj = File(path)
+            obj = get_file_object_for_path(path, instrument_type='sbe', load_file=False)  # This will not
+            # load information from withing the file.
+            if not obj:
+                continue
+            self._all_files_by_stem[root_key].setdefault(obj.pattern, {})
+            self._all_files_by_stem[root_key][obj.pattern][(sub_key, obj.name)] = obj
             self._all_files_by_cruise[root_key].setdefault(obj.cruise, {})
             self._all_files_by_cruise[root_key][obj.cruise][(sub_key, obj.name)] = obj
 
     def get_all_files_by_cruise(self, root_key, cruise):
         self._check_root_key(root_key)
-        return self._all_files_by_cruise[root_key]
+        return self._all_files_by_cruise[root_key][cruise]
 
     def _add_file_to_dir(self, root_key, path):
         if not super()._add_file_to_dir(root_key, path):
             return
         sub_key = self._get_sub_key_for_path(root_key, path.parent)
-        obj = File(path)
-        self._all_files_by_stem[root_key].setdefault(obj.stripped_stem, {})
-        self._all_files_by_stem[root_key][obj.stripped_stem][(sub_key, obj.name)] = obj
+        # obj = File(path)
+        obj = get_file_object_for_path(path, instrument_type='sbe', load_file=False)
+        if not obj:
+            return
+        self._all_files_by_stem[root_key].setdefault(obj.pattern, {})
+        self._all_files_by_stem[root_key][obj.pattern][(sub_key, obj.name)] = obj
 
     def _delete_file_from_dir(self, root_key, path):
         if not super()._delete_file_from_dir(root_key, path):
             return
         sub_key = self._get_sub_key_for_path(root_key, path.parent)
-        obj = File(path)
+        # obj = File(path)
+        obj = get_file_object_for_path(path, instrument_type='sbe', load_file=False)
+        if not obj:
+            return
         # print(f'{root_key=}')
         # print(f'{self._all_files_by_stem[root_key]=}')
-        self._all_files_by_stem[root_key][obj.stripped_stem].pop((sub_key, obj.name), None)
+        self._all_files_by_stem[root_key][obj.pattern].pop((sub_key, obj.name), None)
 
     def _clean_temp_folder(self):
         """ Deletes old files in the temp folder """
