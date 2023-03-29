@@ -158,10 +158,13 @@ def get_packages_from_file_list(file_list, instrument_type='sbe', attributes=Non
     logger.debug('get_packages_from_file_list')
     packages = {}
     for path in file_list:
-        file = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
-        if not file:  # or not utils.is_matching(file, **kwargs): This check is made in get_file_object_for_path
-            logger.debug(f'Could not create file object for path: {path}')
-            continue
+        if isinstance(path, InstrumentFile):
+            file = path
+        else:
+            file = get_file_object_for_path(path, instrument_type=instrument_type, **kwargs)
+            if not file:  # or not utils.is_matching(file, **kwargs): This check is made in get_file_object_for_path
+                logger.debug(f'Could not create file object for path: {path}')
+                continue
         PACK = PACKAGES.get(instrument_type)
         pack = packages.setdefault(file.pattern, PACK(attributes=attributes, **kwargs))
         file.package_instrument_type = PACK.INSTRUMENT_TYPE
