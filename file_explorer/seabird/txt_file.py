@@ -11,8 +11,9 @@ class TxtFile(InstrumentFile, file_data.DataFile):
     date_format = '%b %d %Y %H:%M:%S'
     _datetime = None
     _station = None
-    _metadata = None
-    _header_form = None
+    _metadata = {}
+    _cruise_info = {}
+    _header_form = {}
     _lat = None
     _lon = None
 
@@ -61,6 +62,7 @@ class TxtFile(InstrumentFile, file_data.DataFile):
                         self._lat = data.split('=')[1].strip()[:-1].replace(' ', '')
                     elif data.startswith('* NMEA Longitude'):
                         self._lon = data.split('=')[1].strip()[:-1].replace(' ', '')
+
                     elif data.startswith('** Station'):
                         self._station = data.split(':')[-1].strip()
                     elif data.startswith('** Cruise'):

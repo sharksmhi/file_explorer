@@ -26,6 +26,7 @@ class InstrumentFile(ABC):
         self._key = None
         self._path_info = {}
         self._attributes = {}
+        self._file_loaded = False
         self._no_datetime_from_file_name = kwargs.pop('no_datetime_from_file_name', False)
 
         encoding_key = f'{self.suffix[1:]}_encoding'
@@ -52,6 +53,8 @@ class InstrumentFile(ABC):
             raise
 
     def save_info_from_file(self):
+        if self._file_loaded:
+            return
         try:
             self._save_info_from_file()
 
@@ -62,6 +65,7 @@ class InstrumentFile(ABC):
             # self._attributes['cruise'] = '00'
             self._save_attributes()
             self._add_and_map_attributes()
+            self._file_loaded = True
         except xml.etree.ElementTree.ParseError as e:
             logger.error(f'Could not parse xml in file: {self.path}\n{e}')
             print(self.path)

@@ -11,8 +11,8 @@ class HdrFile(InstrumentFile):
     date_format = '%b %d %Y %H:%M:%S'
     _datetime = None
     _station = None
-    _cruise_info = None
-    _header_form = None
+    _cruise_info = {}
+    _header_form = {}
 
     def _get_datetime(self):
         return self._datetime

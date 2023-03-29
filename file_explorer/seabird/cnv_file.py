@@ -22,9 +22,9 @@ class CnvFile(InstrumentFile, file_data.DataFile):
     _header_lat = None
     _header_lon = None
     _header_station = None
-    _header_form = None
+    _header_form = {}
     _header_names = None
-    _header_cruise_info = None
+    _header_cruise_info = {}
     _xml_tree = None
     _parameters = {}
     _sensor_info = None
@@ -84,6 +84,10 @@ class CnvFile(InstrumentFile, file_data.DataFile):
                     self._header_lat = line.split('=')[1].strip()[:-1].replace(' ', '')
                 elif line.startswith('* NMEA Longitude') and '=' in line:
                     self._header_lon = line.split('=')[1].strip()[:-1].replace(' ', '')
+                elif line.startswith('** Latitude'):
+                    self._header_lat = line.split(':')[-1].strip().replace(' ', '')[:-1]
+                elif line.startswith('** Longitude'):
+                    self._header_lon = line.split(':')[-1].strip().replace(' ', '')[:-1]
                 elif line.startswith('** Station'):
                     self._header_station = line.split(':')[-1].strip()
                 elif line.startswith('** Cruise'):
