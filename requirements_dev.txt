@@ -1,3 +1,5 @@
 pytest
 pytest-cov
 coverage
+setup-py-upgrade
+setup-cfg-fmt

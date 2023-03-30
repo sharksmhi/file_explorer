@@ -1,2 +1,4 @@
 requests
 watchdog
+pandas
+pyyaml
