@@ -243,11 +243,9 @@ def update_package_with_files_in_directory(package, directory, exclude_directory
     logger.debug('update_package_with_files_in_directory')
     # all_files = Path(directory).glob('**/*')
     all_files = _get_paths_in_directory_tree(directory, exclude_directory=exclude_directory)
-    print(f'{all_files=}')
     for path in all_files:
         file = get_file_object_for_path(path, **kwargs)
         if not file:
-            print(f'NOT FILE: {file}')
             continue
         file.package_instrument_type = package.INSTRUMENT_TYPE
         # print('PACKAGE', package.key)

@@ -275,7 +275,7 @@ class SBEFileHandler(FileHandler):
     def _not_updated_on_server(self):
         """ Returns a dict with local files that are not updated on server """
         result = {}
-        for key, server in self.server_files.items():
+        for key, server in self.server_files.copy().items():
             local = self.local_files.get(key)
             if not local:
                 continue
@@ -295,23 +295,21 @@ class SBEFileHandler(FileHandler):
     #     return self._all_local_files_by_directory.get(directory, [])
 
     def copy_files_to_server(self, update=False):
-        print('_not_on_server', self._not_on_server())
-        for key, path in self._not_on_server().items():
+        for key, path_obj in self._not_on_server().items():
             sub, name = key
             server_directory = self.get_dir('server', sub)
-            print('server_directory', server_directory)
             if not server_directory:
                 continue
-            target_path = Path(server_directory, path.name)
-            shutil.copy2(path(), target_path)
+            target_path = Path(server_directory, path_obj.name)
+            shutil.copy2(path_obj.path, target_path)
         if update:
-            for key, path in self._not_updated_on_server().items():
+            for key, path_obj in self._not_updated_on_server().items():
                 sub, name = key
                 server_directory = self.get_dir('server', sub)
                 if not server_directory:
                     continue
-                target_path = Path(server_directory, path.name)
-                shutil.copy2(path(), target_path)
+                target_path = Path(server_directory, path_obj.name)
+                shutil.copy2(path_obj.path, target_path)
 
     # def get_local_file_path(self, subdir=None, suffix=None):
     #     paths = []
