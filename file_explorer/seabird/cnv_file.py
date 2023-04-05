@@ -80,13 +80,13 @@ class CnvFile(InstrumentFile, file_data.DataFile):
                 if line.startswith('* System UTC'):
                     self._header_datetime = datetime.datetime.strptime(line.split('=')[1].strip(),
                                                                        self.header_date_format)
-                elif line.startswith('* NMEA Latitude') and '=' in line:
+                elif line.startswith('* NMEA Latitude') and '=' in line and not self._header_lat:
                     self._header_lat = line.split('=')[1].strip()[:-1].replace(' ', '')
-                elif line.startswith('* NMEA Longitude') and '=' in line:
+                elif line.startswith('* NMEA Longitude') and '=' in line and not self._header_lon:
                     self._header_lon = line.split('=')[1].strip()[:-1].replace(' ', '')
-                elif line.startswith('** Latitude'):
+                elif line.startswith('** Latitude') and not self._header_lat:
                     self._header_lat = line.split(':')[-1].strip().replace(' ', '')[:-1]
-                elif line.startswith('** Longitude'):
+                elif line.startswith('** Longitude') and not self._header_lon:
                     self._header_lon = line.split(':')[-1].strip().replace(' ', '')[:-1]
                 elif line.startswith('** Station'):
                     self._header_station = line.split(':')[-1].strip()
