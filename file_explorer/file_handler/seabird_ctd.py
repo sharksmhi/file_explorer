@@ -136,7 +136,7 @@ class SBEFileHandler(FileHandler):
         # print(f'{root_key=}')
         # print(f'{self._all_files_by_stem[root_key]=}')
         self._all_files_by_stem[root_key][obj.pattern].pop((sub_key, obj.name), None)
-        self._all_files_by_cruise[root_key][obj.cruise].pop(sub_key, obj.name, None)
+        self._all_files_by_cruise[root_key][obj.cruise].pop((sub_key, obj.name), None)
 
     def _clean_temp_folder(self):
         """ Deletes old files in the temp folder """
