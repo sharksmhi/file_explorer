@@ -32,14 +32,14 @@ PREFIX_SUFFIX_SUBFOLDER_MAPPING = {
     (None, '.xmlcon'): 'raw',
     (None, '.con'): 'raw',
     (None, '.zip'): 'raw',
-    (None, '.txt'): 'nsf',
+    (None, '.txt'): 'data',
 }
 #
 #
 # SUBDIR_SUFFIX_MAPPING = {
 #     'source': '.hex',
 #     'cnv': '.cnv',
-#     'nsf': '.txt'
+#     'data': '.txt'
 # }
 #
 #
@@ -188,7 +188,7 @@ class SBEFileHandler(FileHandler):
     #     # self._all_local_files_by_stem = {}
     #     # self._all_local_files_by_directory = {}
     #     # for sub in self.paths.local_sub_directories:
-    #     for sub in ['source', 'raw', 'cnv', 'nsf']:
+    #     for sub in ['source', 'raw', 'cnv', 'data']:
     #         if subdir and sub != subdir:
     #             continue
     #         local_path = self.paths.get_local_directory(sub, create=True)
@@ -209,7 +209,7 @@ class SBEFileHandler(FileHandler):
     #
     # def update_all_server_files(self, subdir=None):
     #     # for sub in self.paths.server_sub_directories:
-    #     for sub in ['raw', 'cnv', 'nsf']:
+    #     for sub in ['raw', 'cnv', 'data']:
     #         if subdir and sub != subdir:
     #             continue
     #         server_path = self.paths.get_server_directory(sub, create=True)

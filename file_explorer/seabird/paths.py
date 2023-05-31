@@ -5,11 +5,12 @@ import shutil
 
 
 class SBEPaths:
+    """Will be replaced by file_explorer.file_handler.FileHandler in the future. Still used by some applications. """
     def __init__(self):
         self._paths = {}
         self._year = None
-        self._sub_dir_list_local = ['source', 'raw', 'cnv', 'nsf', 'cnv_up', 'plots', 'temp']
-        self._sub_dir_list_server = ['raw', 'cnv', 'nsf', 'cnv_up', 'plots']
+        self._sub_dir_list_local = ['source', 'raw', 'cnv', 'data', 'cnv_up', 'plots', 'temp']
+        self._sub_dir_list_server = ['raw', 'cnv', 'data', 'cnv_up', 'plots']
 
     def __call__(self, key, create=False, default=None, **kwargs):
         path = self._paths.get(key)
@@ -121,7 +122,7 @@ class SBEPaths:
 
     def set_local_root_directory(self, directory):
         root_directory = Path(directory).absolute()
-        if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'standard_format', 'plots']:
+        if root_directory.name in ['temp', 'source', 'raw', 'cnv', 'data', 'plots']:
             root_directory = root_directory.parent.parent
         self._paths['local_dir_root'] = root_directory
         self.set_year()
@@ -129,7 +130,7 @@ class SBEPaths:
 
     def set_server_root_directory(self, directory):
         root_directory = Path(directory).absolute()
-        if root_directory.name in ['raw', 'cnv', 'standard_format']:
+        if root_directory.name in ['raw', 'cnv', 'data']:
             root_directory = root_directory.parent
         self._paths['server_dir_root'] = root_directory
         self.set_year()
@@ -140,7 +141,7 @@ class SBEPaths:
         if self._paths.get('server_dir_root'):
             self._paths['server_dir_raw'] = Path(self._paths['server_dir_root'], self._year, 'raw')
             self._paths['server_dir_cnv'] = Path(self._paths['server_dir_root'], self._year, 'cnv')
-            self._paths['server_dir_nsf'] = Path(self._paths['server_dir_root'], self._year, 'standard_format')
+            self._paths['server_dir_data'] = Path(self._paths['server_dir_root'], self._year, 'data')
             self._paths['server_dir_cnv_up'] = Path(self._paths['server_dir_root'], self._year, 'cnv', 'up_cast')
             self._paths['server_dir_plot'] = Path(self._paths['server_dir_root'], self._year, 'plots')
         if self._paths.get('local_dir_root'):
@@ -150,5 +151,5 @@ class SBEPaths:
             self._paths['local_dir_raw'] = Path(self._paths['local_dir_root'], self._year, 'raw')
             self._paths['local_dir_cnv'] = Path(self._paths['local_dir_root'], self._year, 'cnv')
             self._paths['local_dir_cnv_up'] = Path(self._paths['local_dir_root'], self._year, 'cnv', 'up_cast')
-            self._paths['local_dir_nsf'] = Path(self._paths['local_dir_root'], self._year, 'standard_format')
+            self._paths['local_dir_data'] = Path(self._paths['local_dir_root'], self._year, 'data')
             self._paths['local_dir_plot'] = Path(self._paths['local_dir_root'], self._year, 'plots')

@@ -18,11 +18,11 @@ local:
   cnv:
     rel_path: '<YEAR>/cnv'
     suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
-  upcast:
-    rel_path: '<YEAR>/cnv/up_cast'
-    suffixes: ['.cnv']
-  nsf:
-    rel_path: '<YEAR>/standard_format'
+#  upcast:
+#    rel_path: '<YEAR>/cnv/up_cast'
+#    suffixes: ['.cnv']
+  data:
+    rel_path: '<YEAR>/data'
     suffixes: ['.txt']
   plots:
     rel_path: '<YEAR>/plots'
@@ -35,11 +35,11 @@ server:
   cnv:
     rel_path: '<YEAR>/cnv'
     suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
-  upcast:
-    rel_path: '<YEAR>/cnv/up_cast'
-    suffixes: ['.cnv']
-  nsf:
-    rel_path: '<YEAR>/standard_format'
+#  upcast:
+#    rel_path: '<YEAR>/cnv/up_cast'
+#    suffixes: ['.cnv']
+  data:
+    rel_path: '<YEAR>/data'
     suffixes: ['.txt']
   plots:
     rel_path: '<YEAR>/plots'
