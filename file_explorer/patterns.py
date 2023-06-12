@@ -105,7 +105,6 @@ FILE_NAME_PATTERNS = [
                                                     r'(?P<suffix>\w*)?'
                                                     )
                    ),
-
     ]
 
 CRUISE_PATTERNS = [

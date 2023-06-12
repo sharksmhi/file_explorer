@@ -22,7 +22,7 @@ with open(pathlib.Path(root, 'README.md')) as fid:
 
 setuptools.setup(
     name='file_explorer',
-    version='0.1.0',
+    version='0.2.0',
     author="Magnus Wenzer",
     author_email="magnus.wenzer@smhi.se",
     description="Package to handle and bundle files with same file stem",
