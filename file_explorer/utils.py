@@ -1,3 +1,4 @@
+from typing import List, Type
 
 SHIP_TO_INTERNAL = {
     '77SE': '77_10',
@@ -78,3 +79,13 @@ def get_internal_ship_code(code):
 
 def get_pos_from_comment_line(string):
     pass
+
+
+def filter_packages(packages, **kwargs):
+    """Filters a list of packages"""
+    return_packs = []
+    for pack in packages:
+        if not is_matching(pack, **kwargs):
+            continue
+        return_packs.append(pack)
+    return return_packs

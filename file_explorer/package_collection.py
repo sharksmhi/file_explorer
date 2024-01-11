@@ -230,3 +230,11 @@ class PackageCollection:
         if not matching:
             return False
         return True
+
+    def filter(self, **kwargs) -> 'PackageCollection':
+        packs = utils.filter_packages(self.packages, **kwargs)
+        name = self.name
+        if not name.startswith('filtered_'):
+            name = f'filtered_{name}'
+        col = PackageCollection(name=name, packages=packs)
+        return col

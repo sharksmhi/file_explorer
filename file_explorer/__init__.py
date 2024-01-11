@@ -3,7 +3,7 @@ import os
 import pathlib
 import shutil
 from pathlib import Path
-
+from typing import Type, List
 from file_explorer import utils
 from file_explorer.file import InstrumentFile
 from file_explorer.file import UnrecognizedFile
@@ -442,6 +442,7 @@ def edit_seabird_raw_files_in_packages(packs,
         new_pack = edit_seabird_raw_files_in_package(pack, output_dir=output_dir, overwrite=overwrite, **meta)
         new_packs.append(new_pack)
     return new_packs
+
 
 
 

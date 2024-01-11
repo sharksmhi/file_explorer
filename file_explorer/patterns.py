@@ -35,6 +35,7 @@ FILE_NAME_PATTERNS = [
                                                            )
                    ),
         # New standard format
+        # SBE09_1044_20230205_1421_77SE_02_0126.bl
         re.compile('^{}{}_{}_{}{}{}_{}{}_{}_{}_{}{}.{}$'.format(r'(?P<prefix>u|d)?',
                                                            r'(?P<instrument>sbe\d{2})',
                                                            r'(?P<instrument_number>\d{4})',
