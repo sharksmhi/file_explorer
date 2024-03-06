@@ -176,6 +176,10 @@ class Package(Operations):
         return '_'.join(parts).upper()
 
     @property
+    def short_key(self):
+        return f"{self('year')}-{self('ship')}-{self('serno')}"
+
+    @property
     def key(self):
         if not all([value for key, value in self.key_info.items() if key != 'test']):
             return None

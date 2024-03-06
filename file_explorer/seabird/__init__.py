@@ -25,3 +25,26 @@ from .compare import MismatchWarning
 from .paths import SBEPaths
 
 
+METADATA_COLUMNS = [
+    'MPROG',
+    'PROJ',
+    'ORDERER',
+    'SLABO',
+    'ALABO, '
+    'REFSK',
+    'WADEP',
+    'WINDIR',
+    'WINSP',
+    'AIRTEMP',
+    'AIRPRES',
+    'WEATH',
+    'CLOUD',
+    'WAVES',
+    'ICEOB',
+    'COMNT_VISIT',
+    'station',
+    'latitude',
+    'longitude'
+]
+
+

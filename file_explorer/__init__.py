@@ -3,7 +3,11 @@ import os
 import pathlib
 import shutil
 from pathlib import Path
-from typing import Type, List
+from file_explorer import logger
+
+from file_explorer import lims
+from file_explorer import seabird
+from file_explorer import sharkweb
 from file_explorer import utils
 from file_explorer.file import InstrumentFile
 from file_explorer.file import UnrecognizedFile
@@ -33,12 +37,11 @@ from file_explorer.seabird import XmlconFile
 from file_explorer.seabird import ZipFile
 from file_explorer.seabird import edit_hdr
 from file_explorer.seabird import edit_hex
+from file_explorer.seabird import header_form_file
 from file_explorer.seabird import mvp_files
+from file_explorer.logger import file_explorer_logger as logger
 
-from file_explorer import sharkweb
-from file_explorer import lims
-
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 FILES = {
     'sbe': {
@@ -395,9 +398,11 @@ def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, 
         print('-' * 50)
         print()
 
+
 def edit_seabird_raw_files_in_package(pack,
                                       output_dir,
-                                      overwrite=False,
+                                      overwrite_data=False,
+                                      overwrite_files=False,
                                       **meta):
     """
     Edits metadata in hex and hrd files. Saves to new location 'output_dir'. Option to load metadata from
@@ -405,12 +410,12 @@ def edit_seabird_raw_files_in_package(pack,
     """
     for file in pack.get_raw_files():
         if file.suffix == '.hdr':
-            edit_hdr.update_hdr_file(file, output_directory=output_dir, overwrite=overwrite, **meta)
+            header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
         elif file.suffix == '.hex':
-            edit_hex.update_hex_file(file, output_directory=output_dir, overwrite=overwrite, **meta)
+            header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
         else:
             target_path = pathlib.Path(output_dir, file.name)
-            if target_path.exists() and not overwrite:
+            if target_path.exists() and not overwrite_files:
                 raise FileExistsError(target_path)
             shutil.copy2(file.path, target_path)
     return get_package_for_key(pack.key, directory=output_dir)
@@ -418,28 +423,51 @@ def edit_seabird_raw_files_in_package(pack,
 
 def edit_seabird_raw_files_in_packages(packs,
                                        output_dir,
+                                       sharkweb_api=False,
                                        sharkweb_file_path=None,
                                        lims_file_path=None,
-                                       overwrite=False,
+                                       overwrite_data=False,
+                                       overwrite_files=False,
                                        columns=None,
                                        **data):
     """
     Edits metadata in hex and hrd files. Saves to new location 'output_dir'. Option to load metadata from
     sharkweb-file or lims-file
     """
+    if not columns:
+        columns = seabird.METADATA_COLUMNS
     sharkweb_meta = {}
     lims_meta = {}
+    if sharkweb_api:
+        logger.log_workflow('Downloading data from SHARKweb')
+        sharkweb_meta = dict()
+        all_years = sorted(set([pack.year for pack in packs]))
+        file_paths = sharkweb.download_data_from_sharkweb(all_years[0], all_years[-1])
+        if file_paths is None:
+            logger.log_workflow(f'Could not download data from SHARKweb')
+        else:
+            for path in file_paths:
+                meta = sharkweb.get_metadata_from_sharkweb_btl_data(path, columns=columns, encoding='utf8')
+                sharkweb_meta.update(meta)
     if sharkweb_file_path:
-        sharkweb_meta = sharkweb.get_metadata_from_sharkweb_btl_row_data(sharkweb_file_path, columns=columns)
+        sharkweb_meta.update(sharkweb.get_metadata_from_sharkweb_btl_data(sharkweb_file_path, columns=columns, encoding='utf8'))
     if lims_file_path:
         lims_meta = lims.get_metadata_from_lims_export_file(lims_file_path, columns=columns)
     new_packs = []
     for pack in packs:
         meta = {}
+        print(f'{pack.short_key=}')
         meta.update(sharkweb_meta.get(pack.short_key, {}))
+        print(f'sharkweb: {meta=}')
         meta.update(lims_meta.get(pack.short_key, {}))
+        print(f'lims: {meta=}')
         meta.update(data)
-        new_pack = edit_seabird_raw_files_in_package(pack, output_dir=output_dir, overwrite=overwrite, **meta)
+        print(f'kwargs: {meta=}')
+        new_pack = edit_seabird_raw_files_in_package(pack,
+                                                     output_dir=output_dir,
+                                                     overwrite_data=overwrite_data,
+                                                     overwrite_files=overwrite_files,
+                                                     **meta)
         new_packs.append(new_pack)
     return new_packs
 

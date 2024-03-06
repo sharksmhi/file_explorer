@@ -1,16 +1,41 @@
 import pandas as pd
 
 
-def get_metadata_from_sharkweb_btl_row_data(path, columns, **kwargs):
+VALUE_MAPPING = {
+    'NAT Nationell miljöövervakning extra provtagning': 'EXT',
+    'NAT Nationell miljöövervakning': 'NAT',
+    'Sveriges meteorologiska och hydrologiska institut': 'SMHI',
+    'Havs- och vattenmyndigheten': 'HAV'
+
+}
+
+
+def get_value_mapping(value):
+    new_values = []
+    for val in value.split(','):
+        val = val.strip()
+        new_values.append(VALUE_MAPPING.get(val, val))
+    return ', '.join(sorted(new_values))
+
+
+def get_metadata_from_sharkweb_btl_data(path, columns, **kwargs):
     """
     File requirements:
     header: "Kortnamn"
     Decimal/fältavgränsare: Punkt/tabb
     Radbtytning: Windows
-    Teckenkodning: Windows-1252
+    Teckenkodning: utf8
     """
     meta = {}
-    mapping = {'SLABO_PHYSCHEM': 'SLABO'}
+    mapping = {
+        'SLABO_PHYSCHEM': 'SLABO',
+        'STATN': 'station',
+        'LATIT_DM': 'latitude',
+        'LONGI_DM': 'longitude'
+
+    }
+    en = kwargs.get('encoding', 'cp1252')
+    print(f'{en=}')
     with open(path, encoding=kwargs.get('encoding', 'cp1252')) as fid:
         header = None
         for line in fid:
@@ -25,7 +50,7 @@ def get_metadata_from_sharkweb_btl_row_data(path, columns, **kwargs):
             key = f"{d['MYEAR']}-{d['SHIPC']}-{d['VISITID'].zfill(4)}"
             if meta.get(key):
                 continue
-            meta[key] = {mapping.get(key, key): value for key, value in d.items() if mapping.get(key, key) in columns}
+            meta[key] = {mapping.get(key, key): get_value_mapping(value) for key, value in d.items() if mapping.get(key, key) in columns}
     return meta
 
 

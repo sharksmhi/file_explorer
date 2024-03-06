@@ -1,6 +1,8 @@
 import re
+import functools
 
 
+@functools.lru_cache
 def get_dict_from_header_form_line(line):
     """  Returns dict with attributes for a given header form line. """
     if '**' not in line:
@@ -40,6 +42,8 @@ def metadata_string_to_dict(string):
     key_value = [item.strip() for item in string.split('#')]
     data = {}
     for key_val in key_value:
+        if not key_val:
+            continue
         key, value = [item.strip() for item in key_val.split(':')]
         data[key] = value
     return data
