@@ -61,7 +61,7 @@ class FileExplorerLoggerExporter(ABC):
         utils.open_directory(self.file_path.parent)
 
     def _open_file(self):
-        if not self.kwargs.get('open_report'):
+        if not any([self.kwargs.get('open_report'), self.kwargs.get('open'), self.kwargs.get('open_file')]):
             return
         if not self.file_path:
             logger.info(f'open_file is not implemented for exporter {self.__class__.__name__}')
@@ -160,6 +160,7 @@ class XlsxExporter(FileExplorerLoggerExporter):
         worksheet.set_column(2, 2, 90)
         worksheet.set_column(3, 3, 8)
         worksheet.set_column(4, 4, 70)
+        worksheet.set_column(5, 5, 70)
 
         # Close the Pandas Excel writer and output the Excel file.
         writer.close()

@@ -1,3 +1,4 @@
+import pathlib
 from pathlib import Path
 import logging
 import re
@@ -9,7 +10,7 @@ from file_explorer.seabird.hdr_file import HdrFile
 from file_explorer.seabird.hex_file import HexFile
 
 from file_explorer.seabird import utils
-from file_explorer.logger import file_explorer_logger
+from file_explorer.file_explorer_logger import fe_logger
 
 
 logger = logging.getLogger(__name__)
@@ -325,7 +326,7 @@ class HeaderFormFile:
             key = strip_meta_key(key)
             current_obj = self._header_form_lines_mapping.get(key)
             if not current_obj:
-                file_explorer_logger.log_metadata(f'Missing metadata post {key}', add=self.path)
+                fe_logger.log_metadata(f'Missing metadata post {key}', add=self.path)
                 continue
             # print(f'{key=}')
             default_obj.set_value(**{f'{key}': current_obj.get_value(key)})
@@ -344,13 +345,13 @@ class HeaderFormFile:
         self._header_form_lines_mapping = self._header_form_default_object_mapping
 
     def save_file(self, directory, overwrite=False):
-        proj = self.get_metadata('proj')
+        # proj = self.get_metadata('proj')
         # print(f'C: {proj=}')
         output_path = Path(directory, self.path.name)
         if output_path.exists() and not overwrite:
             raise FileExistsError(output_path)
         self._merge_lines()
-        proj = self.get_metadata('proj')
+        # proj = self.get_metadata('proj')
         # print(f'D: {proj=}')
         with open(output_path, 'w') as fid:
             fid.write('\n'.join(self._lines))
@@ -393,15 +394,18 @@ class HeaderFormFile:
         obj = self._header_form_lines_mapping.get(meta)
         if not obj:
             raise KeyError(f'Invalid key to set: {key}')
+        old_value = obj.get_value(meta)
+        if value != old_value:
+            fe_logger.log_metadata(f'Changing value for {get_mapped_meta(meta)}: {old_value} -> {value}', add=self.path, level='warning')
         # print()
         # print(f'A: {meta=}   :   {value=}')
         # print(f'{obj=}', str(obj))
-        proj = obj.get_value('proj')
+        # proj = obj.get_value('proj')
         # print(f'E: {proj=}')
         obj.set_value(**{meta: value})
-        proj = obj.get_value('proj')
+        # proj = obj.get_value('proj')
         # print(f'F: {proj=}')
-        proj = self.get_metadata('proj')
+        # proj = self.get_metadata('proj')
         # print(f'G: {proj=}')
 
     # def __str__(self):
@@ -673,13 +677,16 @@ def update_header_form_file(file, output_directory, overwrite_file=False, overwr
     if not any([isinstance(file, HdrFile), isinstance(file, HexFile)]):
         raise Exception(f'Not a valid header file: {file}')
     obj = HeaderFormFile(file)
-    proj = obj.get_metadata('proj')
+    # proj = obj.get_metadata('proj')
     # print(f'A: {proj=}')
     for key, value in data.items():
         if not overwrite_data and obj.get_metadata(key):
             continue
+        if not value.strip():
+            fe_logger.log_metadata('No value to set for key', add=key)
+            continue
         obj.set_metadata(key, value)
-        proj = obj.get_metadata('proj')
+        # proj = obj.get_metadata('proj')
         # print(f'B: {proj=}')
     # return obj
     return obj.save_file(output_directory, overwrite=overwrite_file)

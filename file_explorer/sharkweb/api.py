@@ -4,6 +4,7 @@ import requests
 import json
 import uuid
 
+
 class SHARKwebAPI():
     """Datasource base class, used for fetching and filtering data
     before transformation to ekostat data format.
@@ -29,7 +30,7 @@ class SHARKwebAPI():
             filenames.append(filename)
 
             # if self.no_download and os.path.exists(filename):
-            #     self.logger.info('Skipping download, file exists \'%s\'' % filename)
+            #     self.file_explorer_logger.info('Skipping download, file exists \'%s\'' % filename)
             #     continue
 
             payload = {
@@ -58,14 +59,14 @@ class SHARKwebAPI():
                 'Accept': 'text/plain',
             }
 
-            # self.logger.info("Requesting download of samples for year '%s' id '%s'" % (year, payload['downloadId']))
+            # self.file_explorer_logger.info("Requesting download of samples for year '%s' id '%s'" % (year, payload['downloadId']))
             with requests.post('%s/api/sample/download' % api_server,
                                 data=json.dumps(payload), headers=headers) as response:
 
                 response.raise_for_status()
 
                 data_location = response.headers['location']
-                # self.logger.info("Downloading data from location '%s' into filename '%s'" % (data_location , filename))
+                # self.file_explorer_logger.info("Downloading data from location '%s' into filename '%s'" % (data_location , filename))
                 with requests.get('%s%s' % (api_server, data_location), stream=True) as data_response:
                     data_response.raise_for_status()
                     chunk_size = 1024*1024

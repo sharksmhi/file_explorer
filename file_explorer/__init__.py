@@ -3,7 +3,7 @@ import os
 import pathlib
 import shutil
 from pathlib import Path
-from file_explorer import logger
+from file_explorer import file_explorer_logger
 
 from file_explorer import lims
 from file_explorer import seabird
@@ -39,9 +39,9 @@ from file_explorer.seabird import edit_hdr
 from file_explorer.seabird import edit_hex
 from file_explorer.seabird import header_form_file
 from file_explorer.seabird import mvp_files
-from file_explorer.logger import file_explorer_logger as logger
+from file_explorer.file_explorer_logger import fe_logger
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 FILES = {
     'sbe': {
@@ -439,12 +439,12 @@ def edit_seabird_raw_files_in_packages(packs,
     sharkweb_meta = {}
     lims_meta = {}
     if sharkweb_api:
-        logger.log_workflow('Downloading data from SHARKweb')
+        fe_logger.log_workflow('Downloading data from SHARKweb')
         sharkweb_meta = dict()
         all_years = sorted(set([pack.year for pack in packs]))
         file_paths = sharkweb.download_data_from_sharkweb(all_years[0], all_years[-1])
         if file_paths is None:
-            logger.log_workflow(f'Could not download data from SHARKweb')
+            fe_logger.log_workflow(f'Could not download data from SHARKweb')
         else:
             for path in file_paths:
                 meta = sharkweb.get_metadata_from_sharkweb_btl_data(path, columns=columns, encoding='utf8')
