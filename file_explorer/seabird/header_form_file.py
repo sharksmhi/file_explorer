@@ -33,8 +33,6 @@ HEADER_FORM_KEYS = {
                     }
 
 
-
-
 HEADER_FIELDS = (
     'Station',
     'Operator',
@@ -89,6 +87,12 @@ METADATA_CONDITIONS_LIST = (
     'COMNT_VISIT'
 )
 
+NMEA_FIELDS = [
+    '* NMEA Latitude = ',
+    '* NMEA Longitude = ',
+    '* NMEA UTC (Time) = '
+]
+
 
 def strip_meta_key(meta):
     return meta.strip('* :').lower().split()[0]
@@ -99,6 +103,81 @@ META_MAPPING = {strip_meta_key(key): key for key in HEADER_FIELDS + METADATA_ADM
 
 def get_mapped_meta(key):
     return META_MAPPING[strip_meta_key(key)]
+
+
+class InfoLine(ABC):
+
+    def __init__(self, line: str) -> None:
+        if not line.startswith('* '):
+            raise Exception(f'Invalid {self.__class__.__name__}: {line}')
+        self._line = line.strip()
+        self._check_if_valid()
+        self._save_info()
+
+    def __str__(self):
+        return self.get_line()
+
+    @property
+    def key_string(self):
+        return self._line.strip('* ').split('=', 1)[0].strip()
+
+    @abstractmethod
+    def _check_if_valid(self):
+        ...
+
+    @abstractmethod
+    def _save_info(self):
+        ...
+
+    @abstractmethod
+    def get_line(self):
+        ...
+
+    @abstractmethod
+    def set_value(self, *args, **kwargs):
+        ...
+
+    @abstractmethod
+    def get_value(self, *args):
+        ...
+
+
+class InfoLineSimple(InfoLine):
+
+    def _check_if_valid(self):
+        if '=' in self._line:
+            raise Exception(f'Invalid {self.__class__.__name__}: {self._line}')
+
+    def _save_info(self):
+        pass
+
+    def get_line(self):
+        return self._line
+
+    def set_value(self, *args, **kwargs):
+        pass
+
+    def get_value(self):
+        return self._line.strip('* ')
+
+
+class InfoLineEditable(InfoLine):
+
+    def _check_if_valid(self):
+        if '=' not in self._line:
+            raise Exception(f'Invalid {self.__class__.__name__}: {self._line}')
+
+    def _save_info(self):
+        self._key, self._value = [item.strip('* ') for item in self._line.split('=')]
+
+    def get_line(self):
+        return f'* {self._key} = {self._value}'
+
+    def set_value(self, *args):
+        self._value = args[0]
+
+    def get_value(self):
+        return self._value
 
 
 class HeaderFormLine(ABC):
@@ -210,14 +289,9 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
         return f'{self.id}: {utils.metadata_dict_to_string(self._data)}'
 
     def set_value(self, *args, **kwargs):
-        # print(f'{args=}    :    {kwargs=}')
-        # print()
-        # print('-'*100)
         for key, value in kwargs.items():
             meta = get_mapped_meta(key)
-            # print(f'{key=}   :   {meta=}   :   {value=}')
             self._data[meta] = value
-            # print(f'{id(self._data)}: {self._data=}')
 
     def get_value(self, *args):
         if len(args) == 1:
@@ -230,6 +304,14 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
 
     def get_all_values(self):
         return self._data
+
+
+def get_info_line_object(line: str, **kwargs):
+    if not line.startswith('* '):
+        raise f'Invalid info line: {line}'
+    if '=' in line:
+        return InfoLineEditable(line)
+    return InfoLineSimple(line)
 
 
 def get_header_form_line_object(line: str, **kwargs):
@@ -263,9 +345,12 @@ class HeaderFormFile:
         self._header_form_default_objects = []
         self._header_form_default_object_mapping = {}
 
+        self._info_field_mapping = {}
+
         self._load_header_form_default_objects()
         self._load_file()
         self._update_current_header()
+        self._add_missing_nmea_fields()
 
     def _load_header_form_default_objects(self):
         for key, value in HEADER_FORM_KEYS.items():
@@ -291,6 +376,10 @@ class HeaderFormFile:
         return self._lines
 
     @property
+    def path(self):
+        return self._file.path
+
+    @property
     def header_lines(self) -> List[str]:
         return [line.strip() for line in self._lines if line.startswith(HEADER_FORM_PREFIX)]
 
@@ -298,13 +387,28 @@ class HeaderFormFile:
     def header_fields(self) -> List[str]:
         return [line.split(':')[0].strip(' *') for line in self.header_lines]
 
+    def _add_missing_nmea_fields(self) -> None:
+        tot_string = '_'.join([obj.get_line() for obj in self._lines_before])
+        missing = []
+        for nmea in NMEA_FIELDS:
+            if nmea not in tot_string:
+                missing.append(get_info_line_object(nmea))
+        if not missing:
+            return
+
+        new_lines_before = []
+        for obj in self._lines_before:
+            new_lines_before.append(obj)
+            if obj.key_string == 'System UpLoad Time':
+                new_lines_before.extend(missing)
+
     def _split_lines(self):
         """Split lines in file into self._header_lines, self._before_lines and self._after_lines"""
         self._lines_before = []
         self._header_form_lines = []
         self._lines_after = []
         for line in self._lines:
-            if line.startswith('**'):
+            if line.startswith(HEADER_FORM_PREFIX):
                 obj = get_header_form_line_object(line)
                 self._header_form_lines.append(obj)
                 for k, v in obj.get_all_values().items():
@@ -313,11 +417,14 @@ class HeaderFormFile:
             elif self._header_form_lines:
                 self._lines_after.append(line)
             else:
-                self._lines_before.append(line)
+                obj = get_info_line_object(line)
+                self._lines_before.append(obj)
+                self._info_field_mapping[obj.key_string] = obj
 
     def _merge_lines(self):
+        lines_before = [str(obj) for obj in self._lines_before]
         header_lines = [str(obj) for obj in self._header_form_lines]
-        self._lines = self._lines_before + header_lines + self._lines_after
+        self._lines = lines_before + header_lines + self._lines_after
 
     def _update_current_header(self):
         """Replaces the header form with new lines. Matching data is added to the updated header form"""
@@ -328,15 +435,8 @@ class HeaderFormFile:
             if not current_obj:
                 fe_logger.log_metadata(f'Missing metadata post {key}', add=self.path)
                 continue
-            # print(f'{key=}')
             default_obj.set_value(**{f'{key}': current_obj.get_value(key)})
 
-        # for obj in self._header_form_default_objects:
-        #     for current_obj in self._header_form_lines:
-        #         if current_obj.id.startswith(obj.match_string):
-        #             obj.set_value(**current_obj.get_all_values())
-        #             break
-        # self._header_form_lines = self._header_form_default_objects
         self._set_header_lines_from_default()
         self._merge_lines()
 
@@ -345,38 +445,13 @@ class HeaderFormFile:
         self._header_form_lines_mapping = self._header_form_default_object_mapping
 
     def save_file(self, directory, overwrite=False):
-        # proj = self.get_metadata('proj')
-        # print(f'C: {proj=}')
         output_path = Path(directory, self.path.name)
         if output_path.exists() and not overwrite:
             raise FileExistsError(output_path)
         self._merge_lines()
-        # proj = self.get_metadata('proj')
-        # print(f'D: {proj=}')
         with open(output_path, 'w') as fid:
             fid.write('\n'.join(self._lines))
         return self._cls(output_path)
-
-    # def __getitem__(self, item):
-    #     item = strip_meta_key(item)
-    #     obj = self._header_form_lines_mapping.get(item)
-    #     if not obj:
-    #         raise Exception(f'Invalid metadata key: {item}')
-    #     return obj.get_value(item)
-
-    # def __setitem__(self, key, value):
-    #     if value in [None, False]:
-    #         value = ''
-    #     else:
-    #         value = str(value)
-    #     meta = strip_meta_key(key)
-    #     obj = self._header_form_lines_mapping.get(meta)
-    #     if not obj:
-    #         raise KeyError(f'Invalid key to set: {key}')
-    #     print()
-    #     print(f'==: {meta=}   :   {value=}')
-    #     print(f'{obj=}', str(obj))
-    #     obj.set_value(**{meta: value})
 
     def get_metadata(self, item):
         item = strip_meta_key(item)
@@ -397,43 +472,38 @@ class HeaderFormFile:
         old_value = obj.get_value(meta)
         if value != old_value:
             fe_logger.log_metadata(f'Changing value for {get_mapped_meta(meta)}: {old_value} -> {value}', add=self.path, level='warning')
-        # print()
-        # print(f'A: {meta=}   :   {value=}')
-        # print(f'{obj=}', str(obj))
-        # proj = obj.get_value('proj')
-        # print(f'E: {proj=}')
         obj.set_value(**{meta: value})
-        # proj = obj.get_value('proj')
-        # print(f'F: {proj=}')
-        # proj = self.get_metadata('proj')
-        # print(f'G: {proj=}')
 
-    # def __str__(self):
-    #     self._merge_lines()
-    #     sep_length = 130
-    #     lines = []
-    #     lines.append('-'*sep_length)
-    #     lines.append(f'Header information in file: {self.path}')
-    #     lines.append('-'*sep_length)
-    #     lines.extend([item.strip() for item in self._lines])
-    #     lines.append('-'*sep_length)
-    #     return '\n'.join(lines)
+    def update_nmea(self):
+        self._update_nmea_lat()
+        self._update_nmea_lon()
+        self._update_nmea_time()
 
-    @property
-    def path(self):
-        return self._file.path
+    def _update_nmea_lat(self):
+        obj = self._info_field_mapping['NMEA Latitude']
+        if obj.get_value():
+            return
+        value = self._header_form_lines_mapping['latitude'].get_value()
+        set_value = f'{value} N'
+        obj.set_value(set_value)
+        fe_logger.log_metadata(f'NMEA Latitude added', add=self.path)
 
-    def remove_header_line(self, match_string):
-        lines = self._get_lines_from_file()
-        new_lines = []
-        for line in lines:
-            if not line.startswith('**'):
-                new_lines.append(line)
-                continue
-            if re.match(match_string, line):
-                continue
-            new_lines.append(line)
-        self._read_lines(new_lines)
+    def _update_nmea_lon(self):
+        obj = self._info_field_mapping['NMEA Longitude']
+        if obj.get_value():
+            return
+        value = self._header_form_lines_mapping['longitude'].get_value()
+        set_value = f'{value} E'
+        obj.set_value(set_value)
+        fe_logger.log_metadata(f'NMEA Longitude added', add=self.path)
+
+    def _update_nmea_time(self):
+        obj = self._info_field_mapping['NMEA UTC (Time)']
+        source_obj = self._info_field_mapping['System UpLoad Time']
+        if obj.get_value():
+            return
+        obj.set_value(source_obj.get_value())
+        fe_logger.log_metadata(f'NMEA UTC (Time) added', add=self.path)
 
     def _read_lines(self, lines):
         self._old_header = []
@@ -443,7 +513,7 @@ class HeaderFormFile:
         self._post_lines = []
         for line in lines:
             line = line.strip()
-            if line.startswith('**'):
+            if line.startswith(HEADER_FORM_PREFIX):
                 self._old_header.append(line)
                 self._old_header_mapping[line.split(':', 1)[0].strip(' *')] = line
                 if 'metadata admin' in line.lower():
@@ -454,231 +524,13 @@ class HeaderFormFile:
                 self._post_lines.append(line)
             else:
                 self._pre_lines.append(line)
-
         self._header_lines = self._old_header[:]
-
-
-class old_HeaderFormFile:
-
-    def __init__(self, file):
-        self._cls = None
-        if isinstance(file, HdrFile):
-            self._cls = HdrFile
-        elif isinstance(file, HexFile):
-            self._cls = HexFile
-        else:
-            msg = f'{file} is not a valid {self.__class__.__name__}'
-            logger.error(msg)
-            raise FileNotFoundError(msg)
-        self._file = file
-
-        self._old_header = []
-        self._old_header_mapping = {}
-
-        self._pre_lines = []
-        self._header_lines = []
-        self._post_lines = []
-
-        self._metadata_admin_index = None
-        self._metadata_condition_index = None
-
-        self._header_fields_added = False
-        self._load_file()
-
-    def _load_file(self):
-        self._read_lines_from_file()
-        self._add_header_fields()
-
-    def __getitem__(self, item):
-        item = item.upper()
-        for line in self._header_lines:
-            if item not in line.upper():
-                continue
-            for key, value in utils.get_dict_from_header_form_line(line).items():
-                if key.upper() == item:
-                    return value
-
-    def __setitem__(self, key, value):
-        if value in [None, False]:
-            value = ''
-        else:
-            value = str(value)
-        self._add_header_fields()
-        key = key.upper()
-
-        if key in METADATA_ADMIN_LIST:
-            line = self._header_lines[self._metadata_admin_index]
-            par, item_str = line.split(':', 1)
-            items = utils.metadata_string_to_dict(item_str)
-            items[key] = value
-            self._header_lines[self._metadata_admin_index] = f'** Metadata admin: ' \
-                                                             f'{utils.metadata_dict_to_string(items)}'
-            logger.debug(f'{key} is set to {value}')
-            return
-
-        if key in METADATA_CONDITIONS_LIST:
-            line = self._header_lines[self._metadata_condition_index]
-            par, item_str = line.split(':', 1)
-            items = utils.metadata_string_to_dict(item_str)
-            items[key] = value
-            self._header_lines[self._metadata_condition_index] = f'** Metadata conditions: ' \
-                                                                 f'{utils.metadata_dict_to_string(items)}'
-            logger.debug(f'{key} is set to {value}')
-            return
-
-        for i, line in enumerate(self._header_lines):
-            if key not in line.upper():
-                continue
-
-            par, info_str = [item.strip() for item in line.split(':', 1)]
-            par = par.strip(' *')
-            if par.upper() == key:
-                new_line = f'** {par}: {value}'
-                self._header_lines[i] = new_line
-                logger.debug(f'{key} is set to {value}')
-                return
-        logger.warning(f'No such key to set: {key}')
-
-    def __str__(self):
-        sep_length = 130
-        lines = []
-        lines.append('-'*sep_length)
-        lines.append(f'Header information in file: {self.path}')
-        lines.append('-'*sep_length)
-        lines.extend([item.strip() for item in self.header_lines])
-        lines.append('-'*sep_length)
-        return '\n'.join(lines)
-
-    @property
-    def path(self):
-        return self._file.path
-
-    @property
-    def pre_lines(self):
-        return self._pre_lines
-
-    @property
-    def header_lines(self):
-        return self._header_lines
-
-    @property
-    def post_lines(self):
-        return self._post_lines
-
-    @property
-    def all_lines(self):
-        all_lines = []
-        all_lines.extend(self.pre_lines)
-        all_lines.extend(self.header_lines)
-        all_lines.extend(self.post_lines)
-        return all_lines
-
-    def remove_header_line(self, match_string):
-        lines = self._get_lines_from_file()
-        new_lines = []
-        for line in lines:
-            if not line.startswith('**'):
-                new_lines.append(line)
-                continue
-            if re.match(match_string, line):
-                continue
-            new_lines.append(line)
-        self._read_lines(new_lines)
-
-    def _read_lines_from_file(self):
-        lines = self._get_lines_from_file()
-        self._read_lines(lines)
-
-    def _get_lines_from_file(self):
-        lines = []
-        with open(self.path) as fid:
-            for line in fid:
-                lines.append(line)
-        return lines
-
-    def _read_lines(self, lines):
-        self._old_header = []
-        self._old_header_mapping = {}
-        self._pre_lines = []
-        self._header_lines = []
-        self._post_lines = []
-        for line in lines:
-            line = line.strip()
-            if line.startswith('**'):
-                self._old_header.append(line)
-                self._old_header_mapping[line.split(':', 1)[0].strip(' *')] = line
-                if 'metadata admin' in line.lower():
-                    self._metadata_admin_index = len(self._old_header) - 1
-                elif 'metadata conditions' in line.lower():
-                    self._metadata_condition_index = len(self._old_header) - 1
-            elif self._old_header:
-                self._post_lines.append(line)
-            else:
-                self._pre_lines.append(line)
-
-        self._header_lines = self._old_header[:]
-
-    def _add_header_fields(self):
-        """
-        Adds all default header fields (rows).
-        """
-        if self._header_fields_added:
-            return
-        old_header = self._old_header[:]
-        new_header = []
-        for field in HEADER_FIELDS:
-            present_value = self._old_header_mapping.get(field)
-            if present_value:
-                new_header.append(self._get_enriched_header_field(present_value))
-                old_header.pop(old_header.index(present_value))
-            else:
-                value = f'** {field}: '
-                new_header.append(self._get_enriched_header_field(value))
-
-        new_header.extend(old_header)
-        self._header_lines = new_header
-
-        self._metadata_admin_index = HEADER_FIELDS.index('Metadata admin')
-        self._metadata_condition_index = HEADER_FIELDS.index('Metadata conditions')
-        self._header_fields_added = True
-
-    @staticmethod
-    def _get_enriched_header_field(current_line):
-        """ Enrich the given header field with default data. Also cleans the data from unwanted spaces. """
-        key, value = current_line.split(':', 1)
-        lower_key = key.lower()
-        if 'pumps' in lower_key:
-            default_dict = dict((k, '') for k in PUMPS_LIST)
-        elif 'event' in lower_key:
-            default_dict = dict((k, '') for k in EVENT_IDS_LIST)
-        elif 'admin' in lower_key:
-            default_dict = dict((k, '') for k in METADATA_ADMIN_LIST)
-        elif 'conditions' in lower_key:
-            default_dict = dict((k, '') for k in METADATA_CONDITIONS_LIST)
-        else:
-            return f'{key.strip()}: {value.strip()}'
-        if '#' in value:
-            value_dict = utils.metadata_string_to_dict(value)
-            default_dict.update(value_dict)
-        return f'{key}: {utils.metadata_dict_to_string(default_dict)}'
-
-    def save_file(self, directory, overwrite=False):
-        output_path = Path(directory, self.path.name)
-        if output_path.exists() and not overwrite:
-            raise FileExistsError(output_path)
-
-        with open(output_path, 'w') as fid:
-            fid.write('\n'.join(self.all_lines))
-
-        return self._cls(output_path)
 
 
 def update_header_form_file(file, output_directory, overwrite_file=False, overwrite_data=False, **data):
     if not any([isinstance(file, HdrFile), isinstance(file, HexFile)]):
         raise Exception(f'Not a valid header file: {file}')
     obj = HeaderFormFile(file)
-    # proj = obj.get_metadata('proj')
-    # print(f'A: {proj=}')
     for key, value in data.items():
         if not overwrite_data and obj.get_metadata(key):
             continue
@@ -686,7 +538,6 @@ def update_header_form_file(file, output_directory, overwrite_file=False, overwr
             fe_logger.log_metadata('No value to set for key', add=key)
             continue
         obj.set_metadata(key, value)
-        # proj = obj.get_metadata('proj')
-        # print(f'B: {proj=}')
-    # return obj
+    obj.update_nmea()
+
     return obj.save_file(output_directory, overwrite=overwrite_file)
