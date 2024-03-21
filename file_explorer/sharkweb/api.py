@@ -78,5 +78,6 @@ class SHARKwebAPI():
 
         return filenames
 
+
 if __name__ == "__main__":
-    SHARKwebAPI(result_directory = '..\data')._prepare(datatypes = ['Physical and Chemical'], year_interval = [1960,2024])
+    SHARKwebAPI(result_directory = r'C:\mw\data\input_sharkadm_sharkweb').save_files(datatypes = ['Physical and Chemical'], year_interval=[2022, 2024])

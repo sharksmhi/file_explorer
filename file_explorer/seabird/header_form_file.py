@@ -455,12 +455,15 @@ class HeaderFormFile:
 
     def get_metadata(self, item):
         item = strip_meta_key(item)
+        print(f'{self._header_form_lines_mapping=}')
         obj = self._header_form_lines_mapping.get(item)
         if not obj:
-            raise Exception(f'Invalid metadata key: {item}')
+            return None
+            # raise Exception(f'Invalid metadata key: {item}')
         return obj.get_value(item)
 
     def set_metadata(self, key, value):
+        print(f'{key=}     :     {value=}')
         if value in [None, False]:
             value = ''
         else:
@@ -532,6 +535,8 @@ def update_header_form_file(file, output_directory, overwrite_file=False, overwr
         raise Exception(f'Not a valid header file: {file}')
     obj = HeaderFormFile(file)
     for key, value in data.items():
+        if obj.get_metadata(key) is None:
+            continue
         if not overwrite_data and obj.get_metadata(key):
             continue
         if not value.strip():
