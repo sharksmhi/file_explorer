@@ -41,6 +41,12 @@ from file_explorer.seabird import header_form_file
 from file_explorer.seabird import mvp_files
 from file_explorer.file_explorer_logger import fe_logger
 
+svepa = None
+try:
+    import svepa
+except ImportError:
+    fe_logger.log_workflow('Could not import svepa module to add svepa metadata!', level=fe_logger.ERROR)
+
 logger = logging.getLogger(__name__)
 
 FILES = {
@@ -409,11 +415,11 @@ def edit_seabird_raw_files_in_package(pack,
     sharkweb-file or lims-file
     """
     for file in pack.get_raw_files():
-        if file.suffix == '.hdr':
-            header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
-        elif file.suffix == '.hex':
-            header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
+        if file.suffix in ['.hdr', '.hex', '.btl', '.ros']:
+            header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, **meta)
+            # header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
         else:
+            continue
             target_path = pathlib.Path(output_dir, file.name)
             if target_path.exists() and not overwrite_files:
                 raise FileExistsError(target_path)
@@ -423,6 +429,7 @@ def edit_seabird_raw_files_in_package(pack,
 
 def edit_seabird_raw_files_in_packages(packs,
                                        output_dir,
+                                       from_svepa=False,
                                        sharkweb_api=False,
                                        sharkweb_file_path=None,
                                        lims_file_path=None,
@@ -456,6 +463,14 @@ def edit_seabird_raw_files_in_packages(packs,
     new_packs = []
     for pack in packs:
         meta = {}
+
+        if from_svepa and svepa:
+            event = svepa.get_svepa_event('ctd', pack.datetime)
+            if event:
+                meta['event_id'] = event.event_id
+                meta['parent_event_id'] = event.parent_event_id
+                meta['Additional Sampling'] = event.ongoing_event_names
+
         print(f'{pack.short_key=}')
         meta.update(sharkweb_meta.get(pack.short_key, {}))
         print(f'sharkweb: {meta=}')
@@ -463,6 +478,7 @@ def edit_seabird_raw_files_in_packages(packs,
         print(f'lims: {meta=}')
         meta.update(data)
         print(f'kwargs: {meta=}')
+
         new_pack = edit_seabird_raw_files_in_package(pack,
                                                      output_dir=output_dir,
                                                      overwrite_data=overwrite_data,

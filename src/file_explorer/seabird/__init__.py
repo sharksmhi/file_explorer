@@ -26,6 +26,8 @@ from .paths import SBEPaths
 
 
 METADATA_COLUMNS = [
+    'SHIPC',
+    'CRUISE_NO'
     'MPROG',
     'PROJ',
     'ORDERER',

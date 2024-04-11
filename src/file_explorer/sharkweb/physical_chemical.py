@@ -31,11 +31,13 @@ def get_metadata_from_sharkweb_btl_data(path, columns, **kwargs):
         'SLABO_PHYSCHEM': 'SLABO',
         'STATN': 'station',
         'LATIT_DM': 'latitude',
-        'LONGI_DM': 'longitude'
+        'LONGI_DM': 'longitude',
+        'SHIPC': 'ship',
+        'CRUISE_NO': 'cruise'
 
     }
     en = kwargs.get('encoding', 'cp1252')
-    print(f'{en=}')
+    # print(f'{en=}')
     with open(path, encoding=kwargs.get('encoding', 'cp1252')) as fid:
         header = None
         for line in fid:
@@ -50,7 +52,16 @@ def get_metadata_from_sharkweb_btl_data(path, columns, **kwargs):
             key = f"{d['MYEAR']}-{d['SHIPC']}-{d['VISITID'].zfill(4)}"
             if meta.get(key):
                 continue
-            meta[key] = {mapping.get(key, key): get_value_mapping(value) for key, value in d.items() if mapping.get(key, key) in columns}
+            meta[key] = {}
+            for k, value in d.items():
+                mapped_k = mapping.get(k, k)
+                if k not in columns and mapped_k not in columns:
+                    continue
+                mapped_value = get_value_mapping(value)
+                meta[key][k] = mapped_value
+                meta[key][mapped_k] = mapped_value
+
+            # meta[key] = {mapping.get(key, key): get_value_mapping(value) for key, value in d.items() if mapping.get(key, key) in columns}
     return meta
 
 
