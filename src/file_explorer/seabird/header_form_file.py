@@ -1,4 +1,6 @@
+import datetime
 import pathlib
+import socket
 from pathlib import Path
 import logging
 import re
@@ -17,6 +19,9 @@ from file_explorer.file_explorer_logger import fe_logger
 
 logger = logging.getLogger(__name__)
 
+LIMS_SHIP_MAPPING = {'77SE': '7710',
+                     '7710': '7710'}
+
 HEADER_FORM_PREFIX = '**'
 
 HEADER_FORM_KEYS = {
@@ -34,6 +39,7 @@ HEADER_FORM_KEYS = {
                 '** Metadata admin: #': '** Metadata adm',
                 '** Metadata conditions: #': '** Metadata con',
                 '** LIMS Job:': '** LIM',
+                '** Bottom Depth [m]:': '** Bottom Depth',
                     }
 
 
@@ -46,12 +52,16 @@ HEADER_FIELDS = (
     'Cruise',
     'Latitude [GG MM.mm N]',
     'Longitude [GGG MM.mm E]',
+    # 'Latitude',
+    # 'Longitude',
     'Pumps',
     'EventIDs',
     'Additional Sampling',
     'Metadata admin',
     'Metadata conditions',
     'LIMS Job',
+    'Bottom Depth [m]',
+    'File modified programmatically',
 )
 
 
@@ -80,10 +90,10 @@ METADATA_ADMIN_LIST = (
 METADATA_CONDITIONS_LIST = (
     # 'WADEP_BOT',
     'WADEP',
-    'WINDIR',
     'WINSP',
-    'AIRTEMP',
+    'WINDIR',
     'AIRPRES',
+    'AIRTEMP',
     'WEATH',
     'CLOUD',
     'WAVES',
@@ -320,7 +330,7 @@ def get_info_line_object(line: str, **kwargs):
 
 def get_header_form_line_object(line: str, **kwargs):
     if not line.startswith('** '):
-        raise f'Invalid header form line: {line}'
+        raise Exception(f'Invalid header form line: {line}')
     if '#' in line:
         return MultipleItemHeaderFormLine(line, **kwargs)
     return OneItemHeaderFormLine(line, **kwargs)
@@ -345,8 +355,8 @@ class HeaderFormFile:
         self._file = file
         self._lines = []
 
-        self._lines_before = []
-        self._header_form_lines = []
+        self._lines_before: list[InfoLine] = []
+        self._header_form_lines: list[HeaderFormLine] = []
         self._lines_after = []
         self._header_form_lines_mapping = {}
 
@@ -433,17 +443,20 @@ class HeaderFormFile:
         self._lines_after = []
         for line in self._lines:
             if line.startswith(HEADER_FORM_PREFIX):
-                obj = get_header_form_line_object(line)
-                self._header_form_lines.append(obj)
-                for k, v in obj.get_all_values().items():
-                    k = strip_meta_key(k)
-                    self._header_form_lines_mapping[k] = obj
+                self._add_header_form_line(line)
             elif self._header_form_lines:
                 self._lines_after.append(line)
             else:
                 obj = get_info_line_object(line)
                 self._lines_before.append(obj)
                 self._info_field_mapping[obj.key_string] = obj
+
+    def _add_header_form_line(self, line: str):
+        obj = get_header_form_line_object(line)
+        self._header_form_lines.append(obj)
+        for k, v in obj.get_all_values().items():
+            k = strip_meta_key(k)
+            self._header_form_lines_mapping[k] = obj
 
     def _merge_lines(self):
         lines_before = [str(obj) for obj in self._lines_before]
@@ -499,6 +512,43 @@ class HeaderFormFile:
         if value != old_value:
             fe_logger.log_metadata(f'Changing value for {get_mapped_meta(meta)}: {old_value} -> {value}', add=self.path, level='warning')
         obj.set_value(**{meta: value})
+
+    def set_lims_job(self, data: dict):
+        year = data.get('year')
+        ship = data.get('ship')
+        serno = data.get('serno')
+        if not all([year, ship, serno]):
+            fe_logger.log_metadata(f'Missing information to set LIMS Job', add=f'{year=}, {ship=}, {serno=}',
+                                   level='warning')
+            return
+
+        key = 'LIMS Job:'
+
+        ship = LIMS_SHIP_MAPPING.get(ship)
+        if ship is None:
+            fe_logger.log_metadata(f'Could not map SHIP to set LIMS Job', add=ship,
+                                   level='warning')
+            return
+
+        lims_job_string = f"{key} {year}{ship}-{serno}"
+
+        current_value = self.get_metadata('LIMS Job')
+        if current_value != lims_job_string:
+            self.set_metadata('LIMS Job', lims_job_string)
+            return True
+        return False
+
+    def set_bottom_depth(self, depth: str):
+        current_value = self.get_metadata('bottom')
+        if current_value != depth:
+            self.set_metadata('bottom', depth)
+            return True
+        return False
+
+    def add_modified_message(self):
+        time_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        line = f'** File modified programmatically: by {socket.gethostname()} {time_str}'
+        self._add_header_form_line(line)
 
     def update_nmea(self):
         self._update_nmea_lat()
@@ -770,12 +820,13 @@ def update_header_form_file(file, output_directory, overwrite_file=False, **data
         pos = pos.rstrip('NEWS').lstrip('0').strip()
         return pos
 
+    is_mod = False
     obj = HeaderFormFile(file)
     for key, value in data.items():
+        fe_logger.log_metadata('Metadata', add=f'{key} = {value}', level=fe_logger.DEBUG)
         lower_key = key.lower().strip()
         val = value.strip()
         current_value = obj.get_metadata(key)
-        print(f'{key=}  :  {value=}')
         if current_value is None:
             continue
         current_value = current_value.strip()
@@ -784,11 +835,25 @@ def update_header_form_file(file, output_directory, overwrite_file=False, **data
             continue
         if lower_key == 'station' and val:
             obj.set_metadata(key, val)
+            if val != current_value:
+                is_mod = True
         elif lower_key == 'ship':
             obj.set_metadata(key, val)
+            if val != current_value:
+                is_mod = True
+        elif lower_key == 'additional sampling':
+            obj.set_metadata(key, val)
+            if val != current_value:
+                is_mod = True
+        elif lower_key in ['mprog', 'slabo', 'alabo', 'refsk']:
+            obj.set_metadata(key, val)
+            if val != current_value:
+                is_mod = True
         elif lower_key == 'cruise':
             if val:
                 obj.set_metadata(key, val)
+                if val != current_value:
+                    is_mod = True
         elif lower_key == 'latitude':
             pos_val = f'{val} N'
             if not obj.nmea_latitude.strip():
@@ -796,10 +861,14 @@ def update_header_form_file(file, output_directory, overwrite_file=False, **data
             if not current_value:
                 fe_logger.log_metadata('Latitude is missing in file. Adding!', add=str(file.path))
                 obj.set_metadata(key, pos_val)
+                if val != current_value:
+                    is_mod = True
             elif mod_pos(current_value) != mod_pos(current_value):
                 fe_logger.log_metadata('Latitude in file differs from given metadata. LOOK IT UP!', add=str(file.path), level=fe_logger.ERROR)
             else:
                 obj.set_metadata(key, pos_val)
+                if val != current_value:
+                    is_mod = True
         elif lower_key == 'longitude':
             pos_val = f'{val} E'
             if not obj.nmea_longitude.strip():
@@ -807,25 +876,42 @@ def update_header_form_file(file, output_directory, overwrite_file=False, **data
             if not current_value:
                 fe_logger.log_metadata('Longitude is missing in file. Adding!', add=str(file.path))
                 obj.set_metadata(key, pos_val)
+                if val != current_value:
+                    is_mod = True
             elif mod_pos(current_value) != mod_pos(current_value):
                 fe_logger.log_metadata('Longitude in file differs from given metadata. LOOK IT UP!', add=str(file.path), level=fe_logger.ERROR)
             else:
                 obj.set_metadata(key, pos_val)
+                if val != current_value:
+                    is_mod = True
         elif key == 'event_id':
             if not current_value:
                 obj.set_metadata(key, val)
+                if val != current_value:
+                    is_mod = True
             elif current_value != val:
                 fe_logger.log_metadata('EVENT_ID is different!', level=fe_logger.ERROR, add=str(file.path))
         elif key == 'parent_event_id':
             if not current_value:
                 obj.set_metadata(key, val)
+                if val != current_value:
+                    is_mod = True
             elif current_value != val:
                 fe_logger.log_metadata('PARENT_EVENT_ID is different!', level=fe_logger.ERROR, add=str(file.path))
 
+    modified = obj.set_lims_job(data=data)
+    if modified:
+        is_mod = True
+    modified = obj.set_bottom_depth(data.get('WADEP'))
+    if modified:
+        is_mod = True
+
+    if is_mod:
+        obj.add_modified_message()
         # obj.set_metadata(key, value)
     # obj.update_nmea()
 
-    # return obj.save_file(output_directory, overwrite=overwrite_file)
+    return obj.save_file(output_directory, overwrite=overwrite_file)
 
 
 def old_update_header_form_file(file, output_directory, overwrite_file=False, overwrite_data=False, **data):

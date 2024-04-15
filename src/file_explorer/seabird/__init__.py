@@ -46,7 +46,8 @@ METADATA_COLUMNS = [
     'COMNT_VISIT',
     'station',
     'latitude',
-    'longitude'
+    'longitude',
+    'cruise'
 ]
 
 

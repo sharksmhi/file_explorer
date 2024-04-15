@@ -419,7 +419,6 @@ def edit_seabird_raw_files_in_package(pack,
             header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, **meta)
             # header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
         else:
-            continue
             target_path = pathlib.Path(output_dir, file.name)
             if target_path.exists() and not overwrite_files:
                 raise FileExistsError(target_path)
@@ -469,15 +468,15 @@ def edit_seabird_raw_files_in_packages(packs,
             if event:
                 meta['event_id'] = event.event_id
                 meta['parent_event_id'] = event.parent_event_id
-                meta['Additional Sampling'] = event.ongoing_event_names
+                meta['Additional Sampling'] = ', '.join(event.ongoing_event_names)
 
-        print(f'{pack.short_key=}')
+        logger.debug(f'{pack.short_key=}')
         meta.update(sharkweb_meta.get(pack.short_key, {}))
-        print(f'sharkweb: {meta=}')
+        logger.debug(f'sharkweb: {meta=}')
         meta.update(lims_meta.get(pack.short_key, {}))
-        print(f'lims: {meta=}')
+        logger.debug(f'lims: {meta=}')
         meta.update(data)
-        print(f'kwargs: {meta=}')
+        logger.debug(f'kwargs: {meta=}')
 
         new_pack = edit_seabird_raw_files_in_package(pack,
                                                      output_dir=output_dir,
