@@ -407,7 +407,6 @@ def list_unrecognized_files_in_directory(directory, instrument_type, tree=True, 
 
 def edit_seabird_raw_files_in_package(pack,
                                       output_dir,
-                                      overwrite_data=False,
                                       overwrite_files=False,
                                       **meta):
     """
@@ -417,7 +416,6 @@ def edit_seabird_raw_files_in_package(pack,
     for file in pack.get_raw_files():
         if file.suffix in ['.hdr', '.hex', '.btl', '.ros']:
             header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, **meta)
-            # header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, overwrite_data=overwrite_data, **meta)
         else:
             target_path = pathlib.Path(output_dir, file.name)
             if target_path.exists() and not overwrite_files:
@@ -432,7 +430,6 @@ def edit_seabird_raw_files_in_packages(packs,
                                        sharkweb_api=False,
                                        sharkweb_file_path=None,
                                        lims_file_path=None,
-                                       overwrite_data=False,
                                        overwrite_files=False,
                                        columns=None,
                                        **data):
@@ -480,7 +477,6 @@ def edit_seabird_raw_files_in_packages(packs,
 
         new_pack = edit_seabird_raw_files_in_package(pack,
                                                      output_dir=output_dir,
-                                                     overwrite_data=overwrite_data,
                                                      overwrite_files=overwrite_files,
                                                      **meta)
         new_packs.append(new_pack)
