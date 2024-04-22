@@ -11,9 +11,10 @@ class DatCnvPSAfile(PSAfile):
         super().__init__(file_path)
 
     def get_parameter_info(self):
-        pars = self.tree.find('CalcArray').getchildren()
+        # pars = self.tree.find('CalcArray').getchildren()
         pars_info = []
-        for par in pars:
+        # for par in pars:
+        for par in list(self.tree.find('CalcArray')):
             info = {}
             info.update(par.attrib)
             calc = par.find('Calc')
