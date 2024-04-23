@@ -157,10 +157,10 @@ class XlsxExporter(FileExplorerLoggerExporter):
         # Make the columns wider for clarity.
         worksheet.set_column(0, 0, 10)
         worksheet.set_column(1, 1, 20)
-        worksheet.set_column(2, 2, 90)
+        worksheet.set_column(2, 2, 70)
         worksheet.set_column(3, 3, 8)
-        worksheet.set_column(4, 4, 70)
-        worksheet.set_column(5, 5, 70)
+        worksheet.set_column(4, 4, 8)
+        worksheet.set_column(5, 5, 80)
 
         # Close the Pandas Excel writer and output the Excel file.
         writer.close()

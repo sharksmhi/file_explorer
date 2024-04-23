@@ -27,7 +27,9 @@ from .paths import SBEPaths
 
 METADATA_COLUMNS = [
     'SHIPC',
-    'CRUISE_NO'
+    'MYEAR',
+    'CRUISE_NO',
+    'VISITID',
     'MPROG',
     'PROJ',
     'ORDERER',
@@ -47,7 +49,9 @@ METADATA_COLUMNS = [
     'station',
     'latitude',
     'longitude',
-    'cruise'
+    'cruise',
+    'serno',
+    'year'
 ]
 
 

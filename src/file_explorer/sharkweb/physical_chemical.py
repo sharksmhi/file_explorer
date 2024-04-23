@@ -33,7 +33,9 @@ def get_metadata_from_sharkweb_btl_data(path, columns, **kwargs):
         'LATIT_DM': 'latitude',
         'LONGI_DM': 'longitude',
         'SHIPC': 'ship',
-        'CRUISE_NO': 'cruise'
+        'CRUISE_NO': 'cruise',
+        'VISITID': 'serno',
+        'MYEAR': 'year',
 
     }
     en = kwargs.get('encoding', 'cp1252')

@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 
 from typing import List
 
+from file_explorer.file import InstrumentFile
 from file_explorer.seabird.hdr_file import HdrFile
 from file_explorer.seabird.hex_file import HexFile
 from file_explorer.seabird.ros_file import RosFile
@@ -547,7 +548,7 @@ class HeaderFormFile:
 
     def add_modified_message(self):
         time_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        line = f'** File modified programmatically: by {socket.gethostname()} {time_str}'
+        line = f'** File modified programmatically: by {pathlib.Path.home().name} on {socket.gethostname()} {time_str}'
         self._add_header_form_line(line)
 
     def update_nmea(self):
@@ -815,7 +816,7 @@ class old_HeaderFormFile:
         self._header_lines = self._old_header[:]
 
 
-def update_header_form_file(file, output_directory, overwrite_file=False, **data):
+def update_header_form_file(file: InstrumentFile, output_directory, overwrite_file=False, **data):
     def mod_pos(pos: str) -> str:
         pos = pos.rstrip('NEWS').lstrip('0').strip()
         return pos
@@ -823,7 +824,7 @@ def update_header_form_file(file, output_directory, overwrite_file=False, **data
     is_mod = False
     obj = HeaderFormFile(file)
     for key, value in data.items():
-        fe_logger.log_metadata('Metadata', add=f'{key} = {value}', level=fe_logger.DEBUG)
+        fe_logger.log_metadata(f'Metadata given to {file.path}', add=f'{key} = {value}', level=fe_logger.DEBUG)
         lower_key = key.lower().strip()
         val = value.strip()
         current_value = obj.get_metadata(key)
