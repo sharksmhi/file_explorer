@@ -464,13 +464,20 @@ def edit_seabird_raw_files_in_packages(packs,
         if from_svepa and svepa:
             event = svepa.get_svepa_event('ctd', pack.datetime)
             if event:
-                if hasattr(event, 'event_id'): meta['event_id'] = event.event_id
-                if hasattr(event, 'parent_event_id'): meta['parent_event_id'] = event.parent_event_id
-                if hasattr(event, 'ongoing_event_names'): meta['Additional Sampling'] = ', '.join(event.ongoing_event_names)
-                if hasattr(event, 'air_pres'): meta['AIRPRES'] = event.air_pres
-                if hasattr(event, 'air_temp'): meta['AIRTEMP'] = event.air_temp
-                if hasattr(event, 'wind_dir'): meta['WINDIR'] = event.wind_dir
-                if hasattr(event, 'wind_speed'): meta['WINSP'] = event.wind_speed
+                if hasattr(event, 'event_id'):
+                    meta['event_id'] = event.event_id
+                if hasattr(event, 'parent_event_id'):
+                    meta['parent_event_id'] = event.parent_event_id
+                if hasattr(event, 'ongoing_event_names'):
+                    meta['Additional Sampling'] = ', '.join(event.ongoing_event_names)
+                if hasattr(event, 'air_pres'):
+                    meta['AIRPRES'] = event.air_pres
+                if hasattr(event, 'air_temp'):
+                    meta['AIRTEMP'] = event.air_temp
+                if hasattr(event, 'wind_dir'):
+                    meta['WINDIR'] = event.wind_dir
+                if hasattr(event, 'wind_speed'):
+                    meta['WINSP'] = event.wind_speed
                 fe_logger.debug(f'Metadata after svepa: {meta}')
 
         fe_logger.debug(f'{pack.short_key=}')
