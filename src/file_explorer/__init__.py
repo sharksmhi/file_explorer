@@ -437,6 +437,7 @@ def edit_seabird_raw_files_in_packages(packs,
     Edits metadata in hex and hrd files. Saves to new location 'output_dir'. Option to load metadata from
     sharkweb-file or lims-file
     """
+    fe_logger.reset_log()
     if not columns:
         columns = seabird.METADATA_COLUMNS
     sharkweb_meta = {}
