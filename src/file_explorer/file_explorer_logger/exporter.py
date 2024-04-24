@@ -15,6 +15,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def get_next_incremented_file_path(path: pathlib.Path):
+    i = 1
+    new_path = _get_incremented_file_path(path, i)
+    while new_path.exists():
+        i += 1
+        new_path = _get_incremented_file_path(path, i)
+    return new_path
+
+
+def _get_incremented_file_path(path, nr):
+    return path.parent / f'{path.stem}({nr}){path.suffix}'
+
+
 class FileExplorerLoggerExporter(ABC):
 
     def __init__(self, **kwargs):
@@ -77,8 +90,19 @@ class XlsxExporter(FileExplorerLoggerExporter):
     def _export(self) -> None:
         self._set_save_path(suffix='.xlsx')
         df = self._extract_info(self.adm_logger.data)
-        self._save_as_xlsx_with_table(df)
-        logger.info(f'Saving file_explorer xlsx log to {self.file_path}')
+        try:
+            self._save_as_xlsx_with_table(df)
+            logger.info(f'Saving sharkadm xlsx log to {self.file_path}')
+        except PermissionError:
+            self.file_path = get_next_incremented_file_path(self.file_path)
+            self._save_as_xlsx_with_table(df)
+            logger.info(f'Saving sharkadm xlsx log to {self.file_path}')
+
+    # def _export(self) -> None:
+    #     self._set_save_path(suffix='.xlsx')
+    #     df = self._extract_info(self.adm_logger.data)
+    #     self._save_as_xlsx_with_table(df)
+    #     logger.info(f'Saving file_explorer xlsx log to {self.file_path}')
 
     def _extract_info(self, data: dict) -> pd.DataFrame:
         info = []

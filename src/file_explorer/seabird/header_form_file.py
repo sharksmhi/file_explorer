@@ -183,7 +183,7 @@ class InfoLineEditable(InfoLine):
             raise Exception(f'Invalid {self.__class__.__name__}: {self._line}')
 
     def _save_info(self):
-        self._key, self._value = [item.strip('* ') for item in self._line.split('=')]
+        self._key, self._value = [item.strip('* ') for item in self._line.split('=', 1)]
 
     def get_line(self):
         return f'* {self._key} = {self._value}'
