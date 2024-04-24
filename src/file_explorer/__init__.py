@@ -466,14 +466,22 @@ def edit_seabird_raw_files_in_packages(packs,
                 meta['event_id'] = event.event_id
                 meta['parent_event_id'] = event.parent_event_id
                 meta['Additional Sampling'] = ', '.join(event.ongoing_event_names)
+                if hasattr(event, 'air_pres'): meta['AIRPRES'] = event.air_pres
+                if hasattr(event, 'air_temp'): meta['AIRTEMP'] = event.air_temp
+                if hasattr(event, 'wind_dir'): meta['WINDIR'] = event.wind_dir
+                if hasattr(event, 'wind_speed'): meta['WINSP'] = event.wind_speed
+                fe_logger.debug(f'Metadata after svepa: {meta}')
 
-        logger.debug(f'{pack.short_key=}')
+        fe_logger.debug(f'{pack.short_key=}')
         meta.update(sharkweb_meta.get(pack.short_key, {}))
-        logger.debug(f'sharkweb: {meta=}')
+        fe_logger.debug(f'sharkweb: {meta=}')
+        fe_logger.debug(f'Metadata after sharkweb: {meta}')
         meta.update(lims_meta.get(pack.short_key, {}))
-        logger.debug(f'lims: {meta=}')
+        fe_logger.debug(f'lims: {meta=}')
+        fe_logger.debug(f'Metadata after lims: {meta}')
         meta.update(data)
-        logger.debug(f'kwargs: {meta=}')
+        fe_logger.debug(f'Metadata after "manuel meta": {meta}')
+        fe_logger.debug(f'kwargs: {meta=}')
 
         new_pack = edit_seabird_raw_files_in_package(pack,
                                                      output_dir=output_dir,

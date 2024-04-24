@@ -823,8 +823,8 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
 
     is_mod = False
     obj = HeaderFormFile(file)
+    fe_logger.log_metadata(f'Metadata given to {file.path}', add=str(data), level=fe_logger.DEBUG)
     for key, value in data.items():
-        fe_logger.log_metadata(f'Metadata given to {file.path}', add=f'{key} = {value}', level=fe_logger.DEBUG)
         lower_key = key.lower().strip()
         val = value.strip()
         current_value = obj.get_metadata(key)
