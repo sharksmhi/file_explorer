@@ -499,6 +499,12 @@ class HeaderFormFile:
             # raise Exception(f'Invalid metadata key: {item}')
         return obj.get_value(item)
 
+    def has_metadata(self, key: str) -> bool:
+        meta = strip_meta_key(key)
+        if meta in self._header_form_lines_mapping:
+            return True
+        return False
+
     def set_metadata(self, key, value):
         # print(f'{key=}     :     {value=}')
         if value in [None, False]:
@@ -899,6 +905,8 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
                     is_mod = True
             elif current_value != val:
                 fe_logger.log_metadata('PARENT_EVENT_ID is different!', level=fe_logger.ERROR, add=str(file.path))
+        elif obj.has_metadata(key):
+            obj.set_metadata(key, val)
 
     modified = obj.set_lims_job(data=data)
     if modified:
