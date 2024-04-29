@@ -323,7 +323,7 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
 
 def get_info_line_object(line: str, **kwargs):
     if not line.startswith('* '):
-        raise f'Invalid info line: {line}'
+        raise Exception(f'Invalid info line: {line}')
     if '=' in line:
         return InfoLineEditable(line)
     return InfoLineSimple(line)
