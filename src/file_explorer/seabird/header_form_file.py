@@ -123,7 +123,7 @@ def get_mapped_meta(key):
 class InfoLine(ABC):
 
     def __init__(self, line: str) -> None:
-        if not line.startswith('* '):
+        if not line.startswith('*'):
             raise Exception(f'Invalid {self.__class__.__name__}: {line}')
         self._line = line.strip()
         self._check_if_valid()
@@ -322,7 +322,7 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
 
 
 def get_info_line_object(line: str, **kwargs):
-    if not line.startswith('* '):
+    if not line.startswith('*'):
         raise Exception(f'Invalid info line: {line}')
     if '=' in line:
         return InfoLineEditable(line)

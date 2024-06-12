@@ -115,6 +115,8 @@ class SBEPaths:
         self._paths['instrumentinfo_file'] = Path(self._paths['config_dir'], 'Instruments.xlsx')
 
     def set_source_directory(self, path):
+        if not path:
+            return
         path = Path(path).absolute()
         if not path.is_dir():
             raise NotADirectoryError(path)
@@ -129,6 +131,8 @@ class SBEPaths:
         self._clean_temp_folder()
 
     def set_server_root_directory(self, directory):
+        if not directory:
+            return
         root_directory = Path(directory).absolute()
         if root_directory.name in ['raw', 'cnv', 'data']:
             root_directory = root_directory.parent
