@@ -105,7 +105,9 @@ PACKAGES = {
 }
 
 
-def _get_paths_in_directory_tree(directory, stem='', exclude_directory=None, exclude_suffix=None, exclude_string='collection', suffix='', **kwargs):
+def _get_paths_in_directory_tree(directory, stem: str = '', exclude_directory=None,
+                                 exclude_suffix=None, exclude_string: str | list[str] = 'collection', suffix: str = '',
+                                 **kwargs):
     """ Returns a list with all file paths in the given directory. Including all sub directories. """
     # if not any([stem, exclude_directory]):
     #     return Path(directory).glob(f'**/*{suffix}*')
