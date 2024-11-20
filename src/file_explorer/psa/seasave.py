@@ -72,12 +72,11 @@ class SeasavePSAfile(PSAfileWithPlot):
     @auto_fire_bottles.setter
     def auto_fire_bottles(self, data: AUTO_FIRE_DATA_DATATYPE):
         element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
-
         remove_child_elements(element, 'Row')
-
         for item in data:
+            item = {key: value for key, value in item.items() if key in AUTO_FIRE_BOTTLE_KEYS}  # filter attributes
             if not sorted(item) == AUTO_FIRE_BOTTLE_KEYS:
-                raise KeyError('Invalid kays found when trying to set auto fire bottles')
+                raise KeyError('Invalid keys found when trying to set auto fire bottles')
             element.append(get_auto_fire_bottle_row(**item))
 
 
@@ -97,6 +96,21 @@ class SeasavePSAfile(PSAfileWithPlot):
         element.set('FiringSequence', firing_sequence)
 
     @property
+    def auto_fire_allow_manual_firing(self) -> bool:
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        if element.get('AllowManualFiring') == '1':
+            return True
+        return False
+
+    @auto_fire_allow_manual_firing.setter
+    def auto_fire_allow_manual_firing(self, status: bool):
+        allow_manual_firing = '0'
+        if bool(status):
+            allow_manual_firing = '1'
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        element.set('AllowManualFiring', allow_manual_firing)
+
+    @property
     def nr_of_water_bottles(self) -> int:
         element = self._get_element_from_tag_list(self.auto_fire_tags)
         return int(element.get('NumberOfWaterBottles'))
@@ -112,12 +126,12 @@ class SeasavePSAfile(PSAfileWithPlot):
     @property
     def min_pressure_or_depth(self) -> str:
         element = self._get_element_from_tag_list(self.auto_fire_data_tags)
-        return element.get('MinPressureOrDepth')
+        return element.get('MinPressureDepth')
 
     @min_pressure_or_depth.setter
     def min_pressure_or_depth(self, press: int | str | float):
         element = self._get_element_from_tag_list(self.auto_fire_data_tags)
-        element.set('MinPressureOrDepth', str(press))
+        element.set('MinPressureDepth', str(press))
 
     @property
     def max_pressure_or_depth(self) -> str:
@@ -296,7 +310,8 @@ class SeasavePSAfile(PSAfileWithPlot):
         element.set('value', value)
 
     def save(self, *args, **kwargs):
-        super().save(*args, space='  ', **kwargs)
+        super().save(*args, space='  ', path=r"C:\mw\git\ctd_config\SBE\seasave_psa\svea\Seasave_mod.psa", **kwargs)
+        #super().save(*args, space='  ', **kwargs)
 
 
 def remove_child_elements(parent_element: ET.Element, tag: str) -> None:
@@ -306,7 +321,8 @@ def remove_child_elements(parent_element: ET.Element, tag: str) -> None:
 
 
 def get_auto_fire_bottle_row(**kwargs) -> ET.Element:
-    return ET.Element('Row', attrib=kwargs)
+    kw = {key: str(value) for key, value in kwargs.items()}
+    return ET.Element('Row', attrib=kw)
 
 
 # def get_auto_fire_bottle_row(index: str | int = None, btl_nr: str | int = None, fire_at: float | str = None) -> ET.Element:
