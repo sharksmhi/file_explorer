@@ -310,8 +310,7 @@ class SeasavePSAfile(PSAfileWithPlot):
         element.set('value', value)
 
     def save(self, *args, **kwargs):
-        super().save(*args, space='  ', path=r"C:\mw\git\ctd_config\SBE\seasave_psa\svea\Seasave_mod.psa", **kwargs)
-        #super().save(*args, space='  ', **kwargs)
+        super().save(*args, space='  ', **kwargs)
 
 
 def remove_child_elements(parent_element: ET.Element, tag: str) -> None:
