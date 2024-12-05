@@ -9,6 +9,8 @@ AUTO_FIRE_DATA_DATATYPE = list[dict[str, int | float]]
 
 AUTO_FIRE_BOTTLE_KEYS = sorted(['index', 'BottleNumber', 'FireAt'])
 
+AUTO_FIRE_DEFAULT_PRESSURE = -50
+
 
 class SeasavePSAfile(PSAfileWithPlot):
     def __init__(self, file_path):
@@ -71,14 +73,40 @@ class SeasavePSAfile(PSAfileWithPlot):
 
     @auto_fire_bottles.setter
     def auto_fire_bottles(self, data: AUTO_FIRE_DATA_DATATYPE):
+        self._reset_auto_fire_bottle_list()
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        btl_nr_mapping = {item['BottleNumber']: item for item in data}
+        for i in range(self.nr_of_water_bottles):
+            btl_nr = str(i + 1)
+            item = btl_nr_mapping.get(btl_nr)
+            if item:
+                fixed_item = {key: value for key, value in item.items() if key in AUTO_FIRE_BOTTLE_KEYS}  # filter attributes
+                fixed_item['index'] = i
+                if sorted(fixed_item) != AUTO_FIRE_BOTTLE_KEYS:
+                    raise KeyError(f'Invalid keys found when trying to set auto fire bottles: {sorted(item)}')
+            else:
+                fixed_item = dict(
+                    index=i,
+                    BottleNumber=btl_nr,
+                    FireAt=AUTO_FIRE_DEFAULT_PRESSURE,
+                )
+            element.append(get_auto_fire_bottle_row(**fixed_item))
+
+    def _reset_auto_fire_bottle_list(self):
         element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
         remove_child_elements(element, 'Row')
-        for item in data:
-            item = {key: value for key, value in item.items() if key in AUTO_FIRE_BOTTLE_KEYS}  # filter attributes
-            if not sorted(item) == AUTO_FIRE_BOTTLE_KEYS:
-                raise KeyError('Invalid keys found when trying to set auto fire bottles')
-            element.append(get_auto_fire_bottle_row(**item))
 
+    def _set_default_auto_fire_list(self):
+        self._reset_auto_fire_bottle_list()
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        for i in range(self.nr_of_water_bottles):
+            btl_nr = str(i + 1)
+            item = dict(
+                index=i,
+                BottleNumber=btl_nr,
+                FireAt=AUTO_FIRE_DEFAULT_PRESSURE,
+            )
+            element.append(get_auto_fire_bottle_row(**item))
 
     @property
     def auto_fire(self) -> bool:
@@ -92,6 +120,8 @@ class SeasavePSAfile(PSAfileWithPlot):
         firing_sequence = '1'
         if bool(status):
             firing_sequence = '3'
+        else:
+            self._set_default_auto_fire_list()
         element = self._get_element_from_tag_list(self.auto_fire_tags)
         element.set('FiringSequence', firing_sequence)
 
