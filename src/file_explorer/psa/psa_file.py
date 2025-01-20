@@ -82,5 +82,7 @@ class PSAfile:
         for item in self.tree.iter():
             print(item)
 
-    def save(self):
-        self.tree.write(self.file_path)
+    def save(self, path: str | pathlib.Path = None, space: str = None):
+        if space:
+            ET.indent(self.tree, space=space, level=0)
+        self.tree.write(path or self.file_path)

@@ -1,8 +1,15 @@
 import pathlib
 
-# from ctd_processing import utils
+import xml.etree.ElementTree as ET
 from file_explorer.seabird import utils
 from .psa_file_with_plot import PSAfileWithPlot
+
+
+AUTO_FIRE_DATA_DATATYPE = list[dict[str, int | float]]
+
+AUTO_FIRE_BOTTLE_KEYS = sorted(['index', 'BottleNumber', 'FireAt'])
+
+AUTO_FIRE_DEFAULT_PRESSURE = -50
 
 
 class SeasavePSAfile(PSAfileWithPlot):
@@ -14,6 +21,9 @@ class SeasavePSAfile(PSAfileWithPlot):
 
         self.xmlcon_name_tags = ['Settings', 'ConfigurationFilePath']
         self.data_file_tags = ['Settings', 'DataFilePath']
+        self.auto_fire_tags = ['Settings', 'WaterSamplerConfiguration']
+        self.auto_fire_data_tags = ['Settings', 'WaterSamplerConfiguration', 'AutoFireData']
+        self.auto_fire_bottle_tags = ['Settings', 'WaterSamplerConfiguration', 'AutoFireData', 'DataTable']
 
         self.station_tags = ['Settings', 'HeaderForm', 'Prompt{{index==0}}']
         self.operator_tags = ['Settings', 'HeaderForm', 'Prompt{{index==1}}']
@@ -50,6 +60,118 @@ class SeasavePSAfile(PSAfileWithPlot):
 
         self.blueprint_display_parameter_tags = ['Clients', 'DisplaySettings', 'Display', 'XYPlotData', 'Axes',
                                                  'Axis{{Calc;FullName;value==<PARAMETER>}}']
+
+    # FiringSequence
+
+    @property
+    def auto_fire_bottles(self) -> AUTO_FIRE_DATA_DATATYPE:
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        data = []
+        for row in element.findall('Row'):
+            data.append(row.attrib)
+        return data
+
+    @auto_fire_bottles.setter
+    def auto_fire_bottles(self, data: AUTO_FIRE_DATA_DATATYPE):
+        self._reset_auto_fire_bottle_list()
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        btl_nr_mapping = {item['BottleNumber']: item for item in data}
+        for i in range(self.nr_of_water_bottles):
+            btl_nr = str(i + 1)
+            item = btl_nr_mapping.get(btl_nr)
+            if item:
+                fixed_item = {key: value for key, value in item.items() if key in AUTO_FIRE_BOTTLE_KEYS}  # filter attributes
+                fixed_item['index'] = i
+                if sorted(fixed_item) != AUTO_FIRE_BOTTLE_KEYS:
+                    raise KeyError(f'Invalid keys found when trying to set auto fire bottles: {sorted(item)}')
+            else:
+                fixed_item = dict(
+                    index=i,
+                    BottleNumber=btl_nr,
+                    FireAt=AUTO_FIRE_DEFAULT_PRESSURE,
+                )
+            element.append(get_auto_fire_bottle_row(**fixed_item))
+
+    def _reset_auto_fire_bottle_list(self):
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        remove_child_elements(element, 'Row')
+
+    def _set_default_auto_fire_list(self):
+        self._reset_auto_fire_bottle_list()
+        element = self._get_element_from_tag_list(self.auto_fire_bottle_tags)
+        for i in range(self.nr_of_water_bottles):
+            btl_nr = str(i + 1)
+            item = dict(
+                index=i,
+                BottleNumber=btl_nr,
+                FireAt=AUTO_FIRE_DEFAULT_PRESSURE,
+            )
+            element.append(get_auto_fire_bottle_row(**item))
+
+    @property
+    def auto_fire(self) -> bool:
+        element = self._get_element_from_tag_list(self.auto_fire_tags)
+        if element.get('FiringSequence') == '3':
+            return True
+        return False
+
+    @auto_fire.setter
+    def auto_fire(self, status: bool):
+        firing_sequence = '1'
+        if bool(status):
+            firing_sequence = '3'
+        else:
+            self._set_default_auto_fire_list()
+        element = self._get_element_from_tag_list(self.auto_fire_tags)
+        element.set('FiringSequence', firing_sequence)
+
+    @property
+    def auto_fire_allow_manual_firing(self) -> bool:
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        if element.get('AllowManualFiring') == '1':
+            return True
+        return False
+
+    @auto_fire_allow_manual_firing.setter
+    def auto_fire_allow_manual_firing(self, status: bool):
+        allow_manual_firing = '0'
+        if bool(status):
+            allow_manual_firing = '1'
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        element.set('AllowManualFiring', allow_manual_firing)
+
+    @property
+    def nr_of_water_bottles(self) -> int:
+        element = self._get_element_from_tag_list(self.auto_fire_tags)
+        return int(element.get('NumberOfWaterBottles'))
+
+    @nr_of_water_bottles.setter
+    def nr_of_water_bottles(self, nr: int):
+        valid_nr = [12, 24]
+        if nr not in valid_nr:
+            raise ValueError(f'Value must be in list: {valid_nr}')
+        element = self._get_element_from_tag_list(self.auto_fire_tags)
+        element.set('NumberOfWaterBottles', str(nr))
+
+    @property
+    def min_pressure_or_depth(self) -> str:
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        return element.get('MinPressureDepth')
+
+    @min_pressure_or_depth.setter
+    def min_pressure_or_depth(self, press: int | str | float):
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        element.set('MinPressureDepth', str(press))
+
+    @property
+    def max_pressure_or_depth(self) -> str:
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        return element.get('MaxPressureOrDepth')
+
+    @max_pressure_or_depth.setter
+    def max_pressure_or_depth(self, press: int | str | float):
+        element = self._get_element_from_tag_list(self.auto_fire_data_tags)
+        element.set('MaxPressureOrDepth', str(press))
 
     @property
     def xmlcon_path(self):
@@ -216,3 +338,27 @@ class SeasavePSAfile(PSAfileWithPlot):
         element = self._get_element_from_tag_list(self.lims_job_tags)
         value = f'LIMS Job: {lims_job}'
         element.set('value', value)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, space='  ', **kwargs)
+
+
+def remove_child_elements(parent_element: ET.Element, tag: str) -> None:
+    children = parent_element.findall(tag)
+    for child in children:
+        parent_element.remove(child)
+
+
+def get_auto_fire_bottle_row(**kwargs) -> ET.Element:
+    kw = {key: str(value) for key, value in kwargs.items()}
+    return ET.Element('Row', attrib=kw)
+
+
+# def get_auto_fire_bottle_row(index: str | int = None, btl_nr: str | int = None, fire_at: float | str = None) -> ET.Element:
+#     attrib = dict(
+#         index=str(index),
+#         BottleNumber=str(btl_nr),
+#         FireAt=str(fire_at)
+#
+#     )
+#     return ET.Element('Row', attrib=attrib)
