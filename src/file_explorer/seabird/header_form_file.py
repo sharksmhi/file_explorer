@@ -1,25 +1,20 @@
 import datetime
+import logging
 import pathlib
 import socket
-from pathlib import Path
-import logging
-import re
 from abc import ABC, abstractmethod
-
+from pathlib import Path
 from typing import List
 
+from file_explorer import exceptions
 from file_explorer.file import InstrumentFile
+from file_explorer.file_explorer_logger import fe_logger
+from file_explorer.seabird import utils
+from file_explorer.seabird.btl_file import BtlFile
 from file_explorer.seabird.hdr_file import HdrFile
 from file_explorer.seabird.hex_file import HexFile
 from file_explorer.seabird.ros_file import RosFile
-from file_explorer.seabird.btl_file import BtlFile
 from file_explorer.seabird.xml_file import XmlFile
-
-from file_explorer.seabird import utils
-from file_explorer.file_explorer_logger import fe_logger
-
-from file_explorer import exceptions
-
 
 logger = logging.getLogger(__name__)
 
@@ -289,7 +284,6 @@ class OneItemHeaderFormLine(HeaderFormLine):
             raise Exception(f'Invalid {self.__class__.__name__}: {self._line.strip()}')
 
     def _save_info(self):
-        print(f'{self._line=}')
         if self._line.count(':') > 1:
             raise exceptions.InvalidHeaderFormLine(f'To many : in line ({self._line})')
         self._key, self._value = [item.strip() for item in self._line.split(':')]
@@ -535,7 +529,6 @@ class HeaderFormFile:
         return False
 
     def set_metadata(self, key, value):
-        # print(f'{key=}     :     {value=}')
         if value in [None, False]:
             value = ''
         else:
@@ -776,7 +769,6 @@ class old_HeaderFormFile:
 
     def get_metadata(self, item):
         item = strip_meta_key(item)
-        # print(f'{self._header_form_lines_mapping=}')
         obj = self._header_form_lines_mapping.get(item)
         if not obj:
             return None
@@ -784,7 +776,6 @@ class old_HeaderFormFile:
         return obj.get_value(item)
 
     def set_metadata(self, key, value):
-        print(f'{key=}     :     {value=}')
         if value in [None, False]:
             value = ''
         else:
@@ -857,17 +848,12 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
         return pos
 
     is_mod = False
-    print(f'{file=}')
     obj = HeaderFormFile(file)
     fe_logger.log_metadata(f'Metadata given to {file.path}', add=str(data), level=fe_logger.DEBUG)
     for key, value in data.items():
         lower_key = key.lower().strip()
         val = value.strip()
         current_value = obj.get_metadata(key)
-        print()
-        print('='*100)
-        print(f'{obj._header_form_lines_mapping=}')
-        print(f'{key=}    :   {val=}   :   {current_value=}')
         if current_value is None:
             continue
         current_value = current_value.strip()
@@ -926,7 +912,6 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
                 if val != current_value:
                     is_mod = True
         elif key == 'event_id':
-            print(f'{key=}   :   {val=}')
             if not current_value:
                 obj.set_metadata(key, val)
                 if val != current_value:
