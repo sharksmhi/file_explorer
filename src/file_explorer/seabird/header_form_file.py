@@ -13,9 +13,12 @@ from file_explorer.seabird.hdr_file import HdrFile
 from file_explorer.seabird.hex_file import HexFile
 from file_explorer.seabird.ros_file import RosFile
 from file_explorer.seabird.btl_file import BtlFile
+from file_explorer.seabird.xml_file import XmlFile
 
 from file_explorer.seabird import utils
 from file_explorer.file_explorer_logger import fe_logger
+
+from file_explorer import exceptions
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +27,7 @@ LIMS_SHIP_MAPPING = {'77SE': '7710',
                      '7710': '7710'}
 
 HEADER_FORM_PREFIX = '**'
+INFO_LINE_PREFIX = '*'
 
 HEADER_FORM_KEYS = {
                 '** Station:': '** Sta',
@@ -123,8 +127,8 @@ def get_mapped_meta(key):
 class InfoLine(ABC):
 
     def __init__(self, line: str) -> None:
-        if not line.startswith('*'):
-            raise Exception(f'Invalid {self.__class__.__name__}: {line}')
+        # if not line.startswith('*'):
+        #     raise Exception(f'Invalid {self.__class__.__name__}: {line}')
         self._line = line.strip()
         self._check_if_valid()
         self._save_info()
@@ -155,6 +159,25 @@ class InfoLine(ABC):
     @abstractmethod
     def get_value(self, *args):
         ...
+
+
+class InfoLineNoPrefix(InfoLine):
+
+    def _check_if_valid(self):
+        if self._line.startswith('*'):
+            raise Exception(f'Invalid {self.__class__.__name__}: {self._line}')
+
+    def _save_info(self):
+        pass
+
+    def get_line(self):
+        return self._line
+
+    def set_value(self, *args, **kwargs):
+        pass
+
+    def get_value(self):
+        return self._line
 
 
 class InfoLineSimple(InfoLine):
@@ -266,6 +289,9 @@ class OneItemHeaderFormLine(HeaderFormLine):
             raise Exception(f'Invalid {self.__class__.__name__}: {self._line.strip()}')
 
     def _save_info(self):
+        print(f'{self._line=}')
+        if self._line.count(':') > 1:
+            raise exceptions.InvalidHeaderFormLine(f'To many : in line ({self._line})')
         self._key, self._value = [item.strip() for item in self._line.split(':')]
 
     def get_line(self):
@@ -321,12 +347,13 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
         return self._data
 
 
-def get_info_line_object(line: str, **kwargs):
-    if not line.startswith('*'):
-        raise Exception(f'Invalid info line: {line}')
-    if '=' in line:
-        return InfoLineEditable(line)
-    return InfoLineSimple(line)
+def get_info_line_object(line: str, **kwargs) -> InfoLine:
+    if line.startswith(INFO_LINE_PREFIX):
+        if '=' in line:
+            return InfoLineEditable(line)
+        return InfoLineSimple(line)
+    else:
+        return InfoLineNoPrefix(line)
 
 
 def get_header_form_line_object(line: str, **kwargs):
@@ -349,6 +376,8 @@ class HeaderFormFile:
             self._cls = RosFile
         elif isinstance(file, BtlFile):
             self._cls = BtlFile
+        elif isinstance(file, XmlFile):
+            self._cls = XmlFile
         else:
             msg = f'{file} is not a valid {self.__class__.__name__}'
             logger.error(msg)
@@ -828,12 +857,17 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
         return pos
 
     is_mod = False
+    print(f'{file=}')
     obj = HeaderFormFile(file)
     fe_logger.log_metadata(f'Metadata given to {file.path}', add=str(data), level=fe_logger.DEBUG)
     for key, value in data.items():
         lower_key = key.lower().strip()
         val = value.strip()
         current_value = obj.get_metadata(key)
+        print()
+        print('='*100)
+        print(f'{obj._header_form_lines_mapping=}')
+        print(f'{key=}    :   {val=}   :   {current_value=}')
         if current_value is None:
             continue
         current_value = current_value.strip()
@@ -892,6 +926,7 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
                 if val != current_value:
                     is_mod = True
         elif key == 'event_id':
+            print(f'{key=}   :   {val=}')
             if not current_value:
                 obj.set_metadata(key, val)
                 if val != current_value:
