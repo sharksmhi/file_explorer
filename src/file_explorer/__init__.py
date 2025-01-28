@@ -45,7 +45,7 @@ svepa_event = None
 try:
     import svepa_event
 except ImportError:
-    fe_logger.log_workflow('Could not import svepa module to add svepa metadata!', level=fe_logger.ERROR)
+    fe_logger.log_workflow('Could not import svepa_event module to add svepa metadata!', level=fe_logger.ERROR)
 
 logger = logging.getLogger(__name__)
 
