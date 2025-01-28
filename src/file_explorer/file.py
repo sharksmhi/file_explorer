@@ -190,6 +190,8 @@ class InstrumentFile(ABC):
                                    f'registered file patterns')
 
     def _get_datetime_from_path(self, force=False):
+        print(f'{self._no_datetime_from_file_name=}')
+        print(f'{force=}')
         if self._no_datetime_from_file_name and not force:
             return
         if all([self._path_info.get(key) for key in ['year', 'day', 'month', 'hour', 'minute', 'second']]):
