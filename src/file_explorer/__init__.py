@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import pathlib
@@ -467,7 +468,8 @@ def edit_seabird_raw_files_in_packages(packs,
         meta = {}
 
         if from_svepa and svepa_event:
-            event = svepa_event.get_svepa_event('ctd', pack.datetime)
+            # event = svepa_event.get_svepa_event('ctd', pack.datetime)
+            event = _get_ctd_svepa_event_for_time(pack.datetime)
             # event = svepa.get_svepa_event('ctd', pack.datetime)
             if event:
                 if hasattr(event, 'event_id'):
@@ -506,6 +508,17 @@ def edit_seabird_raw_files_in_packages(packs,
                                                      **meta)
         new_packs.append(new_pack)
     return new_packs
+
+def _get_ctd_svepa_event_for_time(time: datetime.datetime):
+    event = svepa_event.get_svepa_event('ctd', time)
+    if not event:
+        events = svepa_event.get_svepa_events(time=time)
+        for ev in events:
+            if ev.event_type.lower() == 'station':
+                for statev in ev.children:
+                    print(statev)
+                    if statev.name.lower() == 'ctd':
+                        return statev
 
 
 def _strip_metadata_keys(meta: dict) -> dict:
