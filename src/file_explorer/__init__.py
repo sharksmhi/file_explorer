@@ -471,6 +471,7 @@ def edit_seabird_raw_files_in_packages(packs,
             # event = svepa_event.get_svepa_event('ctd', pack.datetime)
             event = _get_ctd_svepa_event_for_time(pack.datetime)
             # event = svepa.get_svepa_event('ctd', pack.datetime)
+            print(f'{event=}')
             if event:
                 if hasattr(event, 'event_id'):
                     meta['event_id'] = event.event_id
@@ -510,6 +511,7 @@ def edit_seabird_raw_files_in_packages(packs,
     return new_packs
 
 def _get_ctd_svepa_event_for_time(time: datetime.datetime):
+    print(f'{time=}')
     event = svepa_event.get_svepa_event('ctd', time)
     if not event:
         events = svepa_event.get_svepa_events(time=time)
@@ -519,6 +521,7 @@ def _get_ctd_svepa_event_for_time(time: datetime.datetime):
                     print(statev)
                     if statev.name.lower() == 'ctd':
                         return statev
+    return event
 
 
 def _strip_metadata_keys(meta: dict) -> dict:
