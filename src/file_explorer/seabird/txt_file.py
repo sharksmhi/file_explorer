@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 import datetime
 
@@ -47,6 +48,7 @@ class TxtFile(InstrumentFile, file_data.DataFile):
                 if strip_line.startswith('//METADATA;'):
                     m, key, value = strip_line.split(';', 2)
                     self._metadata[key] = value
+
                 elif strip_line.startswith('//SENSORINFO;'):
                     parts = strip_line.split(';')
                     if sensor_info_header:
@@ -58,6 +60,11 @@ class TxtFile(InstrumentFile, file_data.DataFile):
                     self._instrument_metadata.append(data)
                     if data.startswith('* System UTC'):
                         self._datetime = datetime.datetime.strptime(data.split('=')[1].strip(), self.date_format)
+                    elif '* cast' in line:
+                        reg = re.search(r'\d{1,2} \D{3} \d{4} \d{2}:\d{2}:\d{2}', line)
+                        if not reg:
+                            continue
+                        self._datetime = datetime.datetime.strptime(reg.group(), '%d %b %Y %H:%M:%S')
                     elif data.startswith('* NMEA Latitude'):
                         self._lat = data.split('=')[1].strip()[:-1].replace(' ', '')
                     elif data.startswith('* NMEA Longitude'):

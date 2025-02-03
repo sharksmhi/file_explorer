@@ -22,7 +22,6 @@ def add_lims_job(cnv, overwrite=False):
     else:
         path = Path(cnv)
         file = file_explorer.get_file_object_for_path(path, instrument_type='sbe')
-    print('path', path)
 
     if path.suffix != '.cnv':
         msg = f'{path} is not a cnv-file'

@@ -213,7 +213,6 @@ def get_package_for_file(path, directory=None, exclude_directory=None, only_this
     pack = get_packages_from_file_list([path], as_list=True, **kwargs)[0]
     if only_this_file:
         return pack
-
     if not directory:
         directory = path.parent
     logger.info(f'Looking for files in directory: {directory}')
@@ -471,7 +470,6 @@ def edit_seabird_raw_files_in_packages(packs,
             # event = svepa_event.get_svepa_event('ctd', pack.datetime)
             event = _get_ctd_svepa_event_for_time(pack.datetime)
             # event = svepa.get_svepa_event('ctd', pack.datetime)
-            print(f'{event=}')
             if event:
                 if hasattr(event, 'event_id'):
                     meta['event_id'] = event.event_id
@@ -518,7 +516,6 @@ def _get_ctd_svepa_event_for_time(time: datetime.datetime):
         for ev in events:
             if ev.event_type.lower() == 'station':
                 for statev in ev.children:
-                    print(statev)
                     if statev.name.lower() == 'ctd':
                         return statev
     return event
