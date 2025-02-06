@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import pathlib
@@ -41,11 +42,11 @@ from file_explorer.seabird import header_form_file
 from file_explorer.seabird import mvp_files
 from file_explorer.file_explorer_logger import fe_logger
 
-svepa = None
+svepa_event = None
 try:
-    import svepa
+    import svepa_event
 except ImportError:
-    fe_logger.log_workflow('Could not import svepa module to add svepa metadata!', level=fe_logger.ERROR)
+    fe_logger.log_workflow('Could not import svepa_event module to add svepa metadata!', level=fe_logger.ERROR)
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +213,6 @@ def get_package_for_file(path, directory=None, exclude_directory=None, only_this
     pack = get_packages_from_file_list([path], as_list=True, **kwargs)[0]
     if only_this_file:
         return pack
-
     if not directory:
         directory = path.parent
     logger.info(f'Looking for files in directory: {directory}')
@@ -419,7 +419,7 @@ def edit_seabird_raw_files_in_package(pack,
     sharkweb-file or lims-file
     """
     for file in pack.get_raw_files():
-        if file.suffix in ['.hdr', '.hex', '.btl', '.ros']:
+        if file.suffix in ['.hdr', '.hex', '.btl', '.ros', '.xml']:
             header_form_file.update_header_form_file(file, output_directory=output_dir, overwrite_file=overwrite_files, **meta)
         else:
             target_path = pathlib.Path(output_dir, file.name)
@@ -466,8 +466,10 @@ def edit_seabird_raw_files_in_packages(packs,
     for pack in packs:
         meta = {}
 
-        if from_svepa and svepa:
-            event = svepa.get_svepa_event('ctd', pack.datetime)
+        if from_svepa and svepa_event:
+            # event = svepa_event.get_svepa_event('ctd', pack.datetime)
+            event = _get_ctd_svepa_event_for_time(pack.datetime)
+            # event = svepa.get_svepa_event('ctd', pack.datetime)
             if event:
                 if hasattr(event, 'event_id'):
                     meta['event_id'] = event.event_id
@@ -485,6 +487,7 @@ def edit_seabird_raw_files_in_packages(packs,
                     meta['WINSP'] = event.wind_speed
                 fe_logger.debug(f'Metadata after svepa: {meta}')
 
+        fe_logger.debug(f'svepa_event: {meta=}')
         fe_logger.debug(f'{pack.short_key=}')
         meta.update(sharkweb_meta.get(pack.short_key, {}))
         fe_logger.debug(f'sharkweb: {meta=}')
@@ -496,6 +499,8 @@ def edit_seabird_raw_files_in_packages(packs,
         fe_logger.debug(f'Metadata after "manuel meta": {meta}')
         fe_logger.debug(f'kwargs: {meta=}')
 
+        meta = _strip_metadata_keys(meta)
+
         new_pack = edit_seabird_raw_files_in_package(pack,
                                                      output_dir=output_dir,
                                                      overwrite_files=overwrite_files,
@@ -503,7 +508,25 @@ def edit_seabird_raw_files_in_packages(packs,
         new_packs.append(new_pack)
     return new_packs
 
+def _get_ctd_svepa_event_for_time(time: datetime.datetime):
+    print(f'{time=}')
+    event = svepa_event.get_svepa_event('ctd', time)
+    if not event:
+        events = svepa_event.get_svepa_events(time=time)
+        for ev in events:
+            if ev.event_type.lower() == 'station':
+                for statev in ev.children:
+                    if statev.name.lower() == 'ctd':
+                        return statev
+    return event
 
+
+def _strip_metadata_keys(meta: dict) -> dict:
+    new_meta = {}
+    for key, value in meta.items():
+        new_key = key.replace('_', '')
+        new_meta[new_key] = value
+    return new_meta
 
 
 

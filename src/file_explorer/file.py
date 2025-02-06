@@ -49,7 +49,6 @@ class InstrumentFile(ABC):
                 self._add_and_map_attributes()
         except xml.etree.ElementTree.ParseError as e:
             logger.error(f'Could not parse xml in file: {self.path}\n{e}')
-            print(self.path)
             raise
 
     def save_info_from_file(self):

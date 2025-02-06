@@ -1,22 +1,20 @@
 import datetime
+import logging
 import pathlib
 import socket
-from pathlib import Path
-import logging
-import re
 from abc import ABC, abstractmethod
-
+from pathlib import Path
 from typing import List
 
+from file_explorer import exceptions
 from file_explorer.file import InstrumentFile
+from file_explorer.file_explorer_logger import fe_logger
+from file_explorer.seabird import utils
+from file_explorer.seabird.btl_file import BtlFile
 from file_explorer.seabird.hdr_file import HdrFile
 from file_explorer.seabird.hex_file import HexFile
 from file_explorer.seabird.ros_file import RosFile
-from file_explorer.seabird.btl_file import BtlFile
-
-from file_explorer.seabird import utils
-from file_explorer.file_explorer_logger import fe_logger
-
+from file_explorer.seabird.xml_file import XmlFile
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +22,7 @@ LIMS_SHIP_MAPPING = {'77SE': '7710',
                      '7710': '7710'}
 
 HEADER_FORM_PREFIX = '**'
+INFO_LINE_PREFIX = '*'
 
 HEADER_FORM_KEYS = {
                 '** Station:': '** Sta',
@@ -123,8 +122,8 @@ def get_mapped_meta(key):
 class InfoLine(ABC):
 
     def __init__(self, line: str) -> None:
-        if not line.startswith('*'):
-            raise Exception(f'Invalid {self.__class__.__name__}: {line}')
+        # if not line.startswith('*'):
+        #     raise Exception(f'Invalid {self.__class__.__name__}: {line}')
         self._line = line.strip()
         self._check_if_valid()
         self._save_info()
@@ -155,6 +154,25 @@ class InfoLine(ABC):
     @abstractmethod
     def get_value(self, *args):
         ...
+
+
+class InfoLineNoPrefix(InfoLine):
+
+    def _check_if_valid(self):
+        if self._line.startswith('*'):
+            raise Exception(f'Invalid {self.__class__.__name__}: {self._line}')
+
+    def _save_info(self):
+        pass
+
+    def get_line(self):
+        return self._line
+
+    def set_value(self, *args, **kwargs):
+        pass
+
+    def get_value(self):
+        return self._line
 
 
 class InfoLineSimple(InfoLine):
@@ -266,6 +284,8 @@ class OneItemHeaderFormLine(HeaderFormLine):
             raise Exception(f'Invalid {self.__class__.__name__}: {self._line.strip()}')
 
     def _save_info(self):
+        if self._line.count(':') > 1:
+            raise exceptions.InvalidHeaderFormLine(f'To many : in line ({self._line})')
         self._key, self._value = [item.strip() for item in self._line.split(':')]
 
     def get_line(self):
@@ -321,12 +341,13 @@ class MultipleItemHeaderFormLine(HeaderFormLine):
         return self._data
 
 
-def get_info_line_object(line: str, **kwargs):
-    if not line.startswith('*'):
-        raise Exception(f'Invalid info line: {line}')
-    if '=' in line:
-        return InfoLineEditable(line)
-    return InfoLineSimple(line)
+def get_info_line_object(line: str, **kwargs) -> InfoLine:
+    if line.startswith(INFO_LINE_PREFIX):
+        if '=' in line:
+            return InfoLineEditable(line)
+        return InfoLineSimple(line)
+    else:
+        return InfoLineNoPrefix(line)
 
 
 def get_header_form_line_object(line: str, **kwargs):
@@ -349,6 +370,8 @@ class HeaderFormFile:
             self._cls = RosFile
         elif isinstance(file, BtlFile):
             self._cls = BtlFile
+        elif isinstance(file, XmlFile):
+            self._cls = XmlFile
         else:
             msg = f'{file} is not a valid {self.__class__.__name__}'
             logger.error(msg)
@@ -506,7 +529,6 @@ class HeaderFormFile:
         return False
 
     def set_metadata(self, key, value):
-        # print(f'{key=}     :     {value=}')
         if value in [None, False]:
             value = ''
         else:
@@ -747,7 +769,6 @@ class old_HeaderFormFile:
 
     def get_metadata(self, item):
         item = strip_meta_key(item)
-        # print(f'{self._header_form_lines_mapping=}')
         obj = self._header_form_lines_mapping.get(item)
         if not obj:
             return None
@@ -755,7 +776,6 @@ class old_HeaderFormFile:
         return obj.get_value(item)
 
     def set_metadata(self, key, value):
-        print(f'{key=}     :     {value=}')
         if value in [None, False]:
             value = ''
         else:

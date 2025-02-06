@@ -36,4 +36,6 @@ class Data:
         return max(self.df[self._check_par(par)])
 
     def get_par_range(self, par: str) -> tuple:
+        if par not in self.df.columns:
+            return 0, 0
         return self.get_par_min(par), self.get_par_max(par)
