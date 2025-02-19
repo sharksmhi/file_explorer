@@ -38,6 +38,7 @@ HEADER_FORM_KEYS = {
                 '** Additional Sampling:': '** Add',
                 '** Metadata admin: #': '** Metadata adm',
                 '** Metadata conditions: #': '** Metadata con',
+                #No need to add LIMS job by default. This is done in the processing if needed.
                 #'** LIMS Job:': '** LIM',
                 '** Bottom Depth [m]:': '** Bottom Depth',
                     }
@@ -59,7 +60,7 @@ HEADER_FIELDS = (
     'Additional Sampling',
     'Metadata admin',
     'Metadata conditions',
-    #'LIMS Job',
+    'LIMS Job',
     'Bottom Depth [m]',
     'File modified programmatically',
 )
@@ -542,30 +543,30 @@ class HeaderFormFile:
             fe_logger.log_metadata(f'Changing value for {get_mapped_meta(meta)}: {old_value} -> {value}', add=self.path, level='warning')
         obj.set_value(**{meta: value})
 
-    # def set_lims_job(self, data: dict):
-    #     year = data.get('year')
-    #     ship = data.get('ship')
-    #     serno = data.get('serno')
-    #     if not all([year, ship, serno]):
-    #         fe_logger.log_metadata(f'Missing information to set LIMS Job', add=f'{year=}, {ship=}, {serno=}',
-    #                                level='warning')
-    #         return
-    #
-    #     key = 'LIMS Job:'
-    #
-    #     ship = LIMS_SHIP_MAPPING.get(ship)
-    #     if ship is None:
-    #         fe_logger.log_metadata(f'Could not map SHIP to set LIMS Job', add=ship,
-    #                                level='warning')
-    #         return
-    #
-    #     lims_job_string = f"{key} {year}{ship}-{serno}"
-    #
-    #     current_value = self.get_metadata('LIMS Job')
-    #     if current_value != lims_job_string:
-    #         self.set_metadata('LIMS Job', lims_job_string)
-    #         return True
-    #     return False
+    def set_lims_job(self, data: dict):
+        year = data.get('year')
+        ship = data.get('ship')
+        serno = data.get('serno')
+        if not all([year, ship, serno]):
+            fe_logger.log_metadata(f'Missing information to set LIMS Job', add=f'{year=}, {ship=}, {serno=}',
+                                   level='warning')
+            return
+
+        key = 'LIMS Job:'
+
+        ship = LIMS_SHIP_MAPPING.get(ship)
+        if ship is None:
+            fe_logger.log_metadata(f'Could not map SHIP to set LIMS Job', add=ship,
+                                   level='warning')
+            return
+
+        lims_job_string = f"{key} {year}{ship}-{serno}"
+
+        current_value = self.get_metadata('LIMS Job')
+        if current_value != lims_job_string:
+            self.set_metadata('LIMS Job', lims_job_string)
+            return True
+        return False
 
     def set_bottom_depth(self, depth: str):
         current_value = self.get_metadata('bottom')
@@ -928,6 +929,7 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
         elif obj.has_metadata(key):
             obj.set_metadata(key, val)
 
+    #No need to add "LIMS job:" this is done in the processing
     # modified = obj.set_lims_job(data=data)
     # if modified:
     #     is_mod = True
