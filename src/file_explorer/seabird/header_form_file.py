@@ -38,7 +38,8 @@ HEADER_FORM_KEYS = {
                 '** Additional Sampling:': '** Add',
                 '** Metadata admin: #': '** Metadata adm',
                 '** Metadata conditions: #': '** Metadata con',
-                '** LIMS Job:': '** LIM',
+                #No need to add LIMS job by default. This is done in the processing if needed.
+                #'** LIMS Job:': '** LIM',
                 '** Bottom Depth [m]:': '** Bottom Depth',
                     }
 
@@ -928,9 +929,10 @@ def update_header_form_file(file: InstrumentFile, output_directory, overwrite_fi
         elif obj.has_metadata(key):
             obj.set_metadata(key, val)
 
-    modified = obj.set_lims_job(data=data)
-    if modified:
-        is_mod = True
+    #No need to add "LIMS job:" this is done in the processing
+    # modified = obj.set_lims_job(data=data)
+    # if modified:
+    #     is_mod = True
     modified = obj.set_bottom_depth(data.get('WADEP'))
     if modified:
         is_mod = True
