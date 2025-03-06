@@ -1,6 +1,6 @@
 [project]
 name = "file_explorer"
-version = "1.0.0"
+version = "1.1.0"
 description = "Default template for PDM package"
 authors = [
     {name = "Magnus Wenzer", email = "nodc@smhi.se"},
@@ -11,6 +11,7 @@ dependencies = [
     "pandas>=2.2.1",
     "pyyaml>=6.0.1",
     "xlsxwriter>=3.2.0",
+    "build>=1.2.2.post1",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -26,7 +27,6 @@ distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "svepa @ file:///C:/mw/git/refac_sharktools/svepa",
 ]
 [tool.setuptools.packages.find]
 where = ["src"]
