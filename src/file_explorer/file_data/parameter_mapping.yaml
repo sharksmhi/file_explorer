@@ -49,6 +49,7 @@ DOXY_SAT_CTD:
 PAR_CTD:
   - PAR_CTD [µE/(cm2 sec)]
   - PAR/Irradiance, Biospherical/Licor [µE/(cm^2*s)]
+  - PAR/Irradiance, Biospherical/Licor [µE/(m^2*s)]
 
 PHYC_CTD:
   - PHYC_CTD [ppb]
