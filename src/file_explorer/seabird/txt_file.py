@@ -32,6 +32,7 @@ class TxtFile(InstrumentFile, file_data.DataFile):
         self._parameters = None
         self._lat_dd = None
         self._lon_dd = None
+        self._rev_date: datetime.datetime | None = None
 
         header = None
         with open(self.path) as fid:
@@ -56,6 +57,12 @@ class TxtFile(InstrumentFile, file_data.DataFile):
                     else:
                         sensor_info_header = parts[1:]
                 elif strip_line.startswith('//INSTRUMENT_METADATA;'):
+                    date_match = re.search(r'\D{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}', strip_line)
+                    if date_match and "_date = " in strip_line:
+                        try:
+                            self._rev_date = datetime.datetime.strptime(date_match.group(), '%b %d %Y %H:%M:%S')
+                        except ValueError as e:
+                            print(f'Could not parse date string {date_match.group()}')
                     data = strip_line.split(';', 1)[1]
                     self._instrument_metadata.append(data)
                     if data.startswith('* System UTC'):
@@ -82,6 +89,13 @@ class TxtFile(InstrumentFile, file_data.DataFile):
                             self._header_form['info'].append(strip_line)
                 elif strip_line.startswith('//COMNT_QC;'):
                     self._comment_qc.append(strip_line.split(';', 1)[1])
+                    date_match = re.search(r'TIMESTAMP \d{12}', strip_line)
+                    if date_match:
+                        try:
+                            self._rev_date = datetime.datetime.strptime(
+                                date_match.group().split()[-1], '%Y%m%d%H%M')
+                        except ValueError as e:
+                            print(f'Could not parse date string {date_match.split()[-1].group()}')
                 elif not strip_line.startswith('//') and not self._parameters:
                     self._parameters = [item for item in strip_line.split() if item[:2] not in ['Q_', 'Q0']]
 
@@ -100,6 +114,7 @@ class TxtFile(InstrumentFile, file_data.DataFile):
         self._attributes['sensor_info'] = self._sensor_info
         self._attributes['qc'] = self._comment_qc
         self._attributes['parameters'] = self._parameters
+        self._attributes['rev_date'] = self._rev_date
 
     def _get_data_object(self):
         import pandas as pd
