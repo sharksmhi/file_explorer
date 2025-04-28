@@ -1,6 +1,8 @@
 import datetime
 
 import pathlib
+import re
+
 from file_explorer import mapping
 from file_explorer.file import InstrumentFile
 from file_explorer.patterns import get_cruise_match_dict
@@ -31,7 +33,9 @@ class CnvFile(InstrumentFile, file_data.DataFile):
     _nr_data_lines = None
 
     def __init__(self, *args, **kwargs):
+        self._rev_date: datetime.datetime | None = None
         super().__init__(*args, **kwargs)
+
 
     def get_save_name(self):
         if self('prefix') == 'd':
@@ -60,6 +64,7 @@ class CnvFile(InstrumentFile, file_data.DataFile):
         self._attributes['header_form'] = self._header_form
         self._attributes['nr_data_lines'] = self._nr_data_lines
         self._attributes['header_names'] = self._header_names
+        self._attributes['rev_date'] = self._rev_date
 
     def _save_info_from_file(self):
         self._header_form = {'info': []}
@@ -121,6 +126,13 @@ class CnvFile(InstrumentFile, file_data.DataFile):
         if not split_line[0].split('_')[0] in self._psa_header_keys:
             return
         if 'date' in split_line[0]:
+            date_match = re.search(r'\D{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}', line)
+            if date_match:
+                try:
+                    self._rev_date = datetime.datetime.strptime(date_match.group(),
+                                                                '%b %d %Y %H:%M:%S')
+                except ValueError as e:
+                    print(f'Could not parse date string {date_match.group()}')
             return
         if 'time' in split_line[0]:
             return
