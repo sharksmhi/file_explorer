@@ -6,10 +6,10 @@ import pathlib
 import datetime
 import os
 
-from ctd_processing import exceptions
+# from ctd_processing import exceptions
 
 import file_explorer
-from file_explorer.file_handler import FileHandler
+from file_explorer.file_handler.basic import FileHandler
 from file_explorer import get_file_object_for_path
 
 import logging
@@ -413,4 +413,6 @@ def get_seabird_file_handler(**kwargs):
     fh = SBEFileHandler.from_yaml(path)
     if kwargs.get('year'):
         fh.set_year(kwargs.get('year'))
+    if kwargs.get('cruise'):
+        fh.set_cruise(kwargs.get('cruise'))
     return fh

@@ -29,6 +29,7 @@ class FileHandler:
         self._files = dict()
         self._watchers = dict()
         self._year = None
+        self._cruise = None
         self._monitor_callbacks = []
 
     def __repr__(self):
@@ -59,6 +60,10 @@ class FileHandler:
     @property
     def year(self):
         return self._year
+
+    @property
+    def cruise(self):
+        return self._cruise
 
     @property
     def root_keys(self):
@@ -101,10 +106,16 @@ class FileHandler:
         assert len(year) == 4
         self._year = int(year)
 
+    def set_cruise(self, cruise):
+        """Set cruise will replace tag <CRUISE> in all paths"""
+        cruise = str(cruise).strip().lstrip('0')
+        assert cruise.isdigit()
+        self._cruise = cruise.zfill(2)
+
     def set_root_dir(self, root_key, path):
         """Sets the root directory for the given root_key"""
         if not path:
-            logger.warning(f'No valif path given to set root directory {root_key}: {path}')
+            logger.warning(f'No valid path given to set root directory {root_key}: {path}')
             return
         path = pathlib.Path(path)
         if path.is_file():
@@ -123,19 +134,22 @@ class FileHandler:
         self._check_root_dir(root_key)
         return self._root_dirs[root_key]
 
-    def _get_path(self, root_key: str, sub_key: str):
+    def _get_path(self, root_key: str, sub_key: str) -> pathlib.Path:
         self._check_sub_key(root_key, sub_key)
-        sub_path = self._config.get(root_key).get(sub_key).get('rel_path')
-        if sub_path is None or type(sub_path) != str:
-            raise TypeError(f'"{sub_path}" is not a valid sub_path')
-        if '<YEAR>' in sub_path and self.year is None:
-            raise Exception(f'Year is not set to build path: {sub_path}')
-        sub_path = sub_path.replace('<YEAR>', str(self.year))
+        rel_path = self._config.get(root_key).get(sub_key).get('rel_path')
+        print(f"{rel_path=}")
+        if rel_path is None or type(rel_path) != str:
+            raise TypeError(f'"{rel_path}" is not a valid sub_path')
+        if '<YEAR>' in rel_path and self.year is None:
+            raise Exception(f'Year is not set to build path: {rel_path}')
+        rel_path = rel_path.replace('<YEAR>', str(self.year))
+        if '<CRUISE>' in rel_path and self.cruise is None:
+            raise Exception(f'Cruise is not set to build path: {rel_path}')
+        rel_path = rel_path.replace('<CRUISE>', str(self.cruise))
         root_dir = self.get_root_dir(root_key)
-        path = pathlib.Path(root_dir, sub_path)
-        return path
+        return pathlib.Path(root_dir, rel_path)
 
-    def get_dir(self, root_key, sub_key):
+    def get_dir(self, root_key, sub_key) -> pathlib.Path:
         return self._get_path(root_key, sub_key)
 
     def get_files(self, root_key, sub_key, suffixes=None):

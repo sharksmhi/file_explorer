@@ -22,7 +22,7 @@ from .edit_txt import add_event_id
 
 from .compare import MismatchWarning
 
-from .paths import SBEPaths
+# from .paths import SBEPaths
 
 
 METADATA_COLUMNS = [
