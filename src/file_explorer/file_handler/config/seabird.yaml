@@ -13,34 +13,34 @@ local:
     rel_path: 'temp'
     suffixes: []
   raw:
-    rel_path: '<YEAR>/raw'
+    rel_path: '<YEAR>/<CRUISE>/raw'
     suffixes: ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.zip']
   cnv:
-    rel_path: '<YEAR>/cnv'
+    rel_path: '<YEAR>/<CRUISE>/cnv'
     suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
 #  upcast:
-#    rel_path: '<YEAR>/cnv/up_cast'
+#    rel_path: '<YEAR>/<CRUISE>/cnv/up_cast'
 #    suffixes: ['.cnv']
   data:
-    rel_path: '<YEAR>/data'
+    rel_path: '<YEAR>/<CRUISE>/data'
     suffixes: ['.txt']
   plots:
-    rel_path: '<YEAR>/plots'
+    rel_path: '<YEAR>/<CRUISE>/plots'
     suffixes: ['.jpg', '.png']
 
 server:
   raw:
-    rel_path: '<YEAR>/raw'
+    rel_path: '<YEAR>/<CRUISE>/raw'
     suffixes: ['.bl', '.btl', '.hdr', '.hex', '.ros', '.xmlcon', '.con', '.zip']
   cnv:
-    rel_path: '<YEAR>/cnv'
+    rel_path: '<YEAR>/<CRUISE>/cnv'
     suffixes: ['.cnv', '.deliverynote', '.metadata', '.sensorinfo']
 #  upcast:
-#    rel_path: '<YEAR>/cnv/up_cast'
+#    rel_path: '<YEAR>/<CRUISE>/cnv/up_cast'
 #    suffixes: ['.cnv']
   data:
-    rel_path: '<YEAR>/data'
+    rel_path: '<YEAR>/<CRUISE>/data'
     suffixes: ['.txt']
   plots:
-    rel_path: '<YEAR>/plots'
+    rel_path: '<YEAR>/<CRUISE>/plots'
     suffixes: ['.jpg', '.png']
